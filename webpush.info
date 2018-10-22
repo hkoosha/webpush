@@ -1,0 +1,5 @@
+name = Webpush
+description = "Drupal integration of the PHP WebPush library."
+core = 7.x
+
+dependencies[] = entity
