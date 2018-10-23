@@ -1,2 +1,199 @@
 <?php
 
+/**
+ * Implements hook_menu().
+ */
+function webpush_menu() {
+  $items = [];
+
+  $items['webpush/serviceworker/js'] = [
+    'page callback' => 'webpush_serviceworker_file_data',
+//    'access arguments' => ['access webpush'],
+    'access callback' => TRUE,
+    'delivery callback' => 'webpush_deliver_js_file',
+    'file' => 'webpush.pages.inc',
+    'type' => MENU_CALLBACK,
+  ];
+
+  $items['webpush/subscription'] = [
+    'type' => MENU_CALLBACK,
+    'page callback' => 'webpush_subscription',
+    //    'access arguments' => ['access webpush'],
+    'access callback' => TRUE,
+  ];
+
+  return $items;
+}
+
+/**
+ * Implements hook_preprocess_html().
+ */
+function webpush_preprocess_html(&$variables) {
+//  if (!user_access('access webpush')) {
+//    return;
+//  }
+
+  // Load the Service Worker
+  drupal_add_js(drupal_get_path('module', 'webpush') .'/js/sw-load.js', 'file');
+  drupal_add_js(['webpush' => ['path' => url('webpush/serviceworker/js')]], 'setting');
+}
+
+
+
+/**
+ * Implements hook_block_info().
+ */
+function webpush_block_info() {
+  $blocks = [];
+  $blocks['webpush_user_panel'] = [
+    'info' => t('Webpush user panel'),
+  ];
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function webpush_block_view($delta = '') {
+  $block = [];
+
+  switch ($delta) {
+    case 'webpush_user_panel' :
+      $block['content'] = _webpush_block_build();
+      break;
+  }
+
+  return $block;
+
+}
+
+function _webpush_block_build() {
+
+  // Capture the image file path and form into HTML with attributes
+//  $image_file = file_load(variable_get('block_image_fid', ''));
+//  $image_path = '';
+
+//  if (isset($image_file->uri)) {
+//    $image_path = $image_file->uri;
+//  }
+
+//  $image = theme_image([
+//    'path' => ($image_path),
+//    'alt' => t('Image description here.'),
+//    'title' => t('This is our block image.'),
+//    'attributes' => ['class' => 'class_name'],
+//  ]);
+
+  // Capture WYSIWYG text from the variable
+//  $text = variable_get('text_variable', '');
+
+  // Block output in HTML with div wrapper
+  $block = [
+//    'image' => [
+//      '#prefix' => '',
+//      '#type' => 'markup',
+//      '#markup' => $image,
+//    ],
+    'message' => [
+      '#type' => 'markup',
+      '#markup' => '<div id="webpush-subscription-button" style="background-color: yellow; cursor: pointer; color: red; font-size: 28px; padding: 50px; position: fixed; left: 20px; bottom: 50px; z-index: 999;">HERE</div>',
+      '#suffix' => '',
+    ],
+  ];
+  return $block;
+}
+
+function webpush_subscription() {
+  $subscription = json_decode(file_get_contents('php://input'), TRUE);
+
+  switch ($_SERVER['REQUEST_METHOD']) {
+    case 'POST':
+    case 'PUT':
+      webpush_register($subscription);
+      break;
+
+    case 'DELETE':
+      webpush_delete($subscription);
+      break;
+
+    default:
+      // Error: method not handled.
+      return FALSE;
+  }
+
+  return TRUE;
+}
+
+function webpush_register($subscription) {
+  if (!webpush_register__retrieve_entity($subscription)) {
+    try {
+      webpush_register__create_entity($subscription);
+    }
+    catch (Exception $e) { }
+  }
+}
+
+function webpush_delete($subscription) {
+  webpush_register__delete_entity($subscription);
+}
+
+/**
+ * @TODO this needs to be based on custom entity.
+ *
+ * @param $subscription
+ *
+ * @throws \Exception
+ */
+function webpush_register__create_entity($subscription) {
+  $node = new stdClass();
+  $node->title = $subscription['endpoint'];
+  $node->type = "node_webpush_subscription";
+  node_object_prepare($node);
+  $node->language = LANGUAGE_NONE;
+  $node->status = 1;
+  $node->promote = 0;
+  $node->comment = 0;
+  $node->field_endpoint[$node->language][]['value'] = $subscription['endpoint'];
+  $node->field_authtoken[$node->language][]['value'] = $subscription['authToken'];
+  $node->field_cotentencoding[$node->language][]['value'] = $subscription['contentEncoding'];
+  $node->field_publickey[$node->language][]['value'] = $subscription['publicKey'];
+  $node = node_submit($node); // Prepare node for saving
+  node_save($node);
+}
+
+/**
+ * @TODO this needs to be based on custom entity.
+ *
+ * @param $subscription
+ *
+ * @return bool|int|null|string
+ */
+function webpush_register__retrieve_entity($subscription) {
+  $query = new EntityFieldQuery();
+  $query
+    ->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'node_webpush_subscription')
+    ->fieldCondition('field_endpoint', 'value', $subscription['endpoint'])
+    ->fieldCondition('field_authtoken', 'value', $subscription['authToken'])
+    ->fieldCondition('field_publickey', 'value', $subscription['publicKey'])
+    ->addMetaData('account', user_load(1)); // Run the query as user 1.
+  $result = $query->execute();
+  if (isset($result['node'])) {
+    reset($result['node']);
+    return key($result['node']);
+  }
+  return FALSE;
+}
+
+/**
+ * @TODO this needs to be based on custom entity.
+ *
+ * @param $subscription
+ *
+ * @return bool|int|null|string
+ */
+function webpush_register__delete_entity($subscription) {
+  $nid = webpush_register__retrieve_entity($subscription);
+  node_delete($nid);
+}

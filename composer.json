@@ -1,0 +1,16 @@
+{
+    "name": "drupal/webpush",
+    "description": "Drupal integration of the PHP WebPush library.",
+    "type": "drupal-module",
+    "license": "MIT",
+    "homepage": "http://drupal.org/project/webpush",
+    "authors": [
+        {
+            "name": "Stathis Papadopoulos",
+            "email": "efpapado@eksoria.gr"
+        }
+    ],
+    "require": {
+        "minishlink/web-push": "~4.0"
+    }
+}

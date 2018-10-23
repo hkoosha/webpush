@@ -1,0 +1,271 @@
+(function ($) {
+  Drupal.behaviors.webPush = {
+    attach: function (context, settings) {
+
+
+      const applicationServerKey = "BP54FpvHs0xNxwpuhqNXy2MCC5gkEetrzo0B4cWZzDL9N_0U4V5U2oXZ8Lcnss6BS5XHhtu9gfWt6YTN2pELYpg";
+      const privateKey = "XVgQimJjuacqEUUbKUNCsfi62h6gXTt6_34Nv-S7ZCM";
+      let isPushEnabled = false;
+
+      // If there is no subscription related button, nothing to do here.
+      const $pushButton = $('#webpush-subscription-button');
+      if (!$pushButton) {
+        return;
+      }
+
+      // If the features are not supported by the browser, stop here.
+      if (unsupportedFeatures()) {
+        return;
+      }
+
+      // Subscription button
+      $pushButton.once('webpush-subscription-click', function () {
+        $(this).click(function () {
+          if (isPushEnabled) {
+            push_unsubscribe();
+          }
+          else {
+            push_subscribe();
+          }
+        });
+      });
+
+      // Check the current Notification permission.
+      // If its denied, the button should appears as such, until the user
+      // changes the permission manually
+      if (Notification.permission === 'denied') {
+        console.warn('Notifications are denied by the user');
+        changePushButtonState('userdenied');
+        return;
+      }
+
+      // .register(Drupal.settings.pwa.path, {scope: Drupal.settings.basePath})
+
+      navigator.serviceWorker.register("webpush/serviceworker/js", {scope: '/'})
+          .then(() => {
+            console.log('[SW] Service worker has been registered');
+            push_updateSubscription();
+          }, e => {
+            console.error('[SW] Service worker registration failed', e);
+            changePushButtonState('incompatible');
+          });
+
+      //
+      // /**
+      //  * START send_push_notification
+      //  * this part handles the button that calls the endpoint that triggers a
+      //  * notification in the real world, you wouldn't need this, because
+      //  * notifications are typically sent from backend logic
+      //  */
+      //
+      // const sendPushButton = document.querySelector('#send-push-button');
+      // if (!sendPushButton) {
+      //   return;
+      // }
+      //
+      // sendPushButton.addEventListener('click', () =>
+      //     navigator.serviceWorker.ready
+      //         .then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.getSubscription())
+      //         .then(subscription => {
+      //           if (!subscription) {
+      //             alert('Please enable push notifications');
+      //             return;
+      //           }
+      //
+      //           const key = subscription.getKey('p256dh');
+      //           const token = subscription.getKey('auth');
+      //           const contentEncoding = (PushManager.supportedContentEncodings || ['aesgcm'])[0];
+      //
+      //           fetch('send_push_notification.php', {
+      //             method: 'POST',
+      //             body: JSON.stringify({
+      //               endpoint: subscription.endpoint,
+      //               publicKey: key ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))) : null,
+      //               authToken: token ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth')))) : null,
+      //               contentEncoding,
+      //             })
+      //           })
+      //         })
+      // );
+
+      /**
+       * END send_push_notification
+       */
+
+
+      /**
+       * **************************************************
+       * **************** Helper functions ****************
+       * **************************************************
+       */
+
+      function unsupportedFeatures() {
+        if (!('serviceWorker' in navigator)) {
+          console.warn("Service workers are not supported by this browser");
+          changePushButtonState('incompatible');
+          return true;
+        }
+
+        if (!('PushManager' in window)) {
+          console.warn('Push notifications are not supported by this browser');
+          changePushButtonState('incompatible');
+          return true;
+        }
+
+        if (!('showNotification' in ServiceWorkerRegistration.prototype)) {
+          console.warn('Notifications are not supported by this browser');
+          changePushButtonState('incompatible');
+          return true;
+        }
+        return false;
+      }
+
+      function push_subscribe() {
+        changePushButtonState('computing');
+
+        navigator.serviceWorker.ready
+            .then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(applicationServerKey),
+            }))
+            .then(subscription => {
+              // Subscription was successful
+              // create subscription on your server
+              return push_sendSubscriptionToServer(subscription, 'POST');
+            })
+            .then(subscription => subscription && changePushButtonState('enabled')) // update your UI
+            .catch(e => {
+              if (Notification.permission === 'denied') {
+                // The user denied the notification permission which
+                // means we failed to subscribe and the user will need
+                // to manually change the notification permission to
+                // subscribe to push messages
+                console.warn('Notifications are denied by the user.');
+                changePushButtonState('userdenied');
+              }
+              else {
+                // A problem occurred with the subscription; common reasons
+                // include network errors or the user skipped the permission
+                console.error('Impossible to subscribe to push notifications', e);
+                changePushButtonState('disabled');
+              }
+            });
+      }
+
+      function push_unsubscribe() {
+        changePushButtonState('computing');
+
+        // To unsubscribe from push messaging, you need to get the subscription
+        // object
+        navigator.serviceWorker.ready
+            .then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.getSubscription())
+            .then(subscription => {
+              // Check that we have a subscription to unsubscribe
+              if (!subscription) {
+                // No subscription object, so set the state
+                // to allow the user to subscribe to push
+                changePushButtonState('disabled');
+                return;
+              }
+
+              // We have a subscription, unsubscribe
+              // Remove push subscription from server
+              return push_sendSubscriptionToServer(subscription, 'DELETE');
+            })
+            .then(subscription => subscription.unsubscribe())
+            .then(() => changePushButtonState('disabled'))
+            .catch(e => {
+              // We failed to unsubscribe, this can lead to
+              // an unusual state, so  it may be best to remove
+              // the users data from your data store and
+              // inform the user that you have done so
+              console.error('Error when unsubscribing the user', e);
+              changePushButtonState('disabled');
+            });
+      }
+
+      function changePushButtonState(state) {
+        switch (state) {
+          case 'enabled':
+            $pushButton.disabled = false;
+            $pushButton.text("Disable Push notifications");
+            isPushEnabled = true;
+            break;
+          case 'disabled':
+            $pushButton.disabled = false;
+            $pushButton.text("Enable Push notifications");
+            isPushEnabled = false;
+            break;
+          case 'computing':
+            $pushButton.disabled = true;
+            $pushButton.text("Loading...");
+            break;
+          case 'incompatible':
+            $pushButton.disabled = true;
+            $pushButton.text("Push notifications are not compatible with this browser");
+            break;
+          case 'userdenied':
+            $pushButton.disabled = true;
+            $pushButton.text("The user has denied push notifications");
+            break;
+          default:
+            console.error('Unhandled push button state', state);
+            break;
+        }
+      }
+
+      function push_sendSubscriptionToServer(subscription, method) {
+        const key = subscription.getKey('p256dh');
+        const token = subscription.getKey('auth');
+        const contentEncoding = (PushManager.supportedContentEncodings || ['aesgcm'])[0];
+
+        let d = new Date();
+        return fetch('/webpush/subscription?' + d.getTime(), {
+          method,
+          body: JSON.stringify({
+            endpoint: subscription.endpoint,
+            publicKey: key ? btoa(String.fromCharCode.apply(null, new Uint8Array(key))) : null,
+            authToken: token ? btoa(String.fromCharCode.apply(null, new Uint8Array(token))) : null,
+            contentEncoding,
+          }),
+        }).then(() => subscription);
+      }
+
+      function push_updateSubscription() {
+        navigator.serviceWorker.ready.then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.getSubscription())
+            .then(subscription => {
+              changePushButtonState('disabled');
+
+              if (!subscription) {
+                // We aren't subscribed to push, so set UI to allow the user to
+                // enable push
+                return;
+              }
+
+              // Keep your server in sync with the latest endpoint
+              return push_sendSubscriptionToServer(subscription, 'PUT');
+            })
+            .then(subscription => subscription && changePushButtonState('enabled')) // Set your UI to show they have subscribed for push messages
+            .catch(e => {
+              console.error('Error when updating the subscription', e);
+            });
+      }
+
+      function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/\-/g, '+')
+            .replace(/_/g, '/');
+
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+
+        for (let i = 0; i < rawData.length; ++i) {
+          outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+      }
+
+    }
+  };
+})(jQuery);
