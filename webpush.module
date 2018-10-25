@@ -8,7 +8,7 @@ function webpush_menu() {
 
   $items['webpush/serviceworker/js'] = [
     'page callback' => 'webpush_serviceworker_file_data',
-    //    'access arguments' => ['access webpush'],
+    'access arguments' => ['register webpush'],
     'access callback' => TRUE,
     'delivery callback' => 'webpush_deliver_js_file',
     'file' => 'webpush.pages.inc',
@@ -18,7 +18,7 @@ function webpush_menu() {
   $items['webpush/subscription'] = [
     'type' => MENU_CALLBACK,
     'page callback' => 'webpush_subscription',
-    //    'access arguments' => ['access webpush'],
+    'access arguments' => ['register webpush'],
     'access callback' => TRUE,
   ];
 
@@ -63,6 +63,10 @@ function webpush_menu() {
  */
 function webpush_permission() {
   return [
+    'register webpush' => [
+      'title' => t('Register webpush'),
+      'description' => t('Register for receiving push notifications.'),
+    ],
     'administer webpush' => [
       'title' => t('Administer webpush'),
       'description' => t('Set configuration options for webpush.'),
@@ -154,7 +158,16 @@ function _webpush_block_build() {
 }
 
 function webpush_subscription() {
-  $subscription = json_decode(file_get_contents('php://input'), TRUE);
+  require '../vendor/autoload.php';
+
+  $subscription_input = json_decode(file_get_contents('php://input'), TRUE);
+  $subscription = Minishlink\WebPush\Subscription::create([
+    'endpoint' => $subscription_input['endpoint'],
+    'authToken' => $subscription_input['authToken'],
+    'publicKey' => $subscription_input['publicKey'],
+    'contentEncoding' => $subscription_input['contentEncoding'],
+  ]);
+
 
   switch ($_SERVER['REQUEST_METHOD']) {
     case 'POST':
@@ -178,8 +191,10 @@ function webpush_subscription() {
  * @TODO we need to make it extendable
  *
  * @param $subscription
+ *
+ * @throws \ErrorException
  */
-function webpush_register($subscription, $options = []) {
+function webpush_register(Minishlink\WebPush\Subscription $subscription, $options = []) {
   if (!webpush_register__retrieve_entity($subscription)) {
     try {
       webpush_register__create_entity($subscription);
@@ -188,7 +203,14 @@ function webpush_register($subscription, $options = []) {
   }
 }
 
-function webpush_delete($subscription) {
+/**
+ * @TODO this needs to be based on custom entity.
+ *
+ * @param \Minishlink\WebPush\Subscription $subscription
+ *
+ * @throws \ErrorException
+ */
+function webpush_delete(Minishlink\WebPush\Subscription $subscription) {
   webpush_register__delete_entity($subscription);
 }
 
@@ -199,19 +221,20 @@ function webpush_delete($subscription) {
  *
  * @throws \Exception
  */
-function webpush_register__create_entity($subscription) {
+function webpush_register__create_entity(Minishlink\WebPush\Subscription $subscription) {
+  require '../vendor/autoload.php';
+
+  $serialized = serialize($subscription);
+
   $node = new stdClass();
-  $node->title = $subscription['endpoint'];
+  $node->title = rand();
   $node->type = "node_webpush_subscription";
   node_object_prepare($node);
   $node->language = LANGUAGE_NONE;
   $node->status = 1;
   $node->promote = 0;
   $node->comment = 0;
-  $node->field_endpoint[$node->language][]['value'] = $subscription['endpoint'];
-  $node->field_authtoken[$node->language][]['value'] = $subscription['authToken'];
-  $node->field_cotentencoding[$node->language][]['value'] = $subscription['contentEncoding'];
-  $node->field_publickey[$node->language][]['value'] = $subscription['publicKey'];
+  $node->field_subscription[$node->language][]['value'] = $serialized;
   $node = node_submit($node); // Prepare node for saving
   node_save($node);
 }
@@ -222,15 +245,16 @@ function webpush_register__create_entity($subscription) {
  * @param $subscription
  *
  * @return bool|int|null|string
+ * @throws \ErrorException
  */
-function webpush_register__retrieve_entity($subscription) {
+function webpush_register__retrieve_entity(Minishlink\WebPush\Subscription $subscription) {
+  $serialized = serialize($subscription);
+
   $query = new EntityFieldQuery();
   $query
     ->entityCondition('entity_type', 'node')
     ->entityCondition('bundle', 'node_webpush_subscription')
-    ->fieldCondition('field_endpoint', 'value', $subscription['endpoint'])
-    ->fieldCondition('field_authtoken', 'value', $subscription['authToken'])
-    ->fieldCondition('field_publickey', 'value', $subscription['publicKey'])
+    ->fieldCondition('field_subscription', 'value', $serialized)
     ->addMetaData('account', user_load(1)); // Run the query as user 1.
   $result = $query->execute();
   if (isset($result['node'])) {
@@ -246,8 +270,42 @@ function webpush_register__retrieve_entity($subscription) {
  * @param $subscription
  *
  * @return bool|int|null|string
+ * @throws \ErrorException
  */
-function webpush_register__delete_entity($subscription) {
+function webpush_register__delete_entity(Minishlink\WebPush\Subscription $subscription) {
   $nid = webpush_register__retrieve_entity($subscription);
   node_delete($nid);
 }
+
+function webpush__send_notification($title, $body) {
+  require '../vendor/autoload.php';
+//  $subscription = new
+
+  $type = "node_webpush_subscription";
+  $nodes = node_load_multiple(array(), array('type' => $type));
+  foreach($nodes as $node) {
+    $wrapper = entity_metadata_wrapper('node', $node);
+
+    $subscription = unserialize($wrapper->field_subscription->value());
+
+    $auth = array(
+      'VAPID' => array(
+        'subject' => $title,
+        'publicKey' => variable_get('webpush_public_key', ''),
+        'privateKey' => variable_get('webpush_private_key', ''),
+      ),
+    );
+
+    $webPush = new Minishlink\WebPush\WebPush($auth);
+
+    $res = $webPush->sendNotification(
+      $subscription,
+      $title,
+      true
+    );
+  }
+
+
+
+}
+

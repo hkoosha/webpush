@@ -27,9 +27,13 @@ function webpush_admin_send_form() {
 
 function webpush_admin_send_form_submit($form, &$form_state) {
   $values = $form_state['values'];
+  $title = $values['title'];
+  $body = $values['body'];
   dsm($values, 'values');
 
   drupal_set_message('Form submitted!');
+
+  webpush__send_notification($title, $body);
 }
 
 function webpush_admin_configuration_form() {
