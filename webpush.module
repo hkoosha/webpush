@@ -22,7 +22,55 @@ function webpush_menu() {
     'access callback' => TRUE,
   ];
 
+  $items['admin/config/services/webpush'] = array(
+    'type' => MENU_NORMAL_ITEM,
+    'title' => 'Webpush',
+    'description' => 'Webpush settings.',
+    'access arguments' => array('administer webpush'),
+    'file' => 'webpush.admin.inc',
+
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('webpush_admin_overview_form'),
+  );
+
+  $items['admin/config/services/webpush/overview'] = array(
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'title' => 'Overview',
+    'description' => 'Webpush settings.',
+    'weight' => -50,
+    'access arguments' => array('administer webpush'),
+    'file' => 'webpush.admin.inc',
+
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('webpush_admin_overview_form'),
+  );
+
+  $items['admin/config/services/webpush/configure'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Configuration',
+    'description' => 'Webpush settings.',
+    'access arguments' => array('administer webpush'),
+    'file' => 'webpush.admin.inc',
+
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('webpush_admin_configuration_form'),
+  );
+
+
   return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function webpush_permission() {
+  return array(
+    'administer webpush' => array(
+      'title' => t('Administer webpush'),
+      'description' => t('Set configuration options for webpush.'),
+    ),
+  );
+
 }
 
 /**
@@ -125,7 +173,12 @@ function webpush_subscription() {
   return TRUE;
 }
 
-function webpush_register($subscription) {
+/**
+ * @TODO we need to make it extendable
+ *
+ * @param $subscription
+ */
+function webpush_register($subscription, $options = []) {
   if (!webpush_register__retrieve_entity($subscription)) {
     try {
       webpush_register__create_entity($subscription);
