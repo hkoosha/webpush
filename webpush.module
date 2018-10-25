@@ -164,8 +164,6 @@ function _webpush_block_build() {
 }
 
 function webpush_subscription() {
-  require '../vendor/autoload.php';
-
   $subscription_input = json_decode(file_get_contents('php://input'), TRUE);
   $subscription = Minishlink\WebPush\Subscription::create([
     'endpoint' => $subscription_input['endpoint'],
@@ -225,8 +223,6 @@ function webpush_delete(Minishlink\WebPush\Subscription $subscription) {
  * @throws \Exception
  */
 function webpush_register__create_entity(Minishlink\WebPush\Subscription $subscription) {
-  require '../vendor/autoload.php';
-
   $serialized = serialize($subscription);
 
   $node = new stdClass();
@@ -279,8 +275,6 @@ function webpush_register__delete_entity(Minishlink\WebPush\Subscription $subscr
 }
 
 function webpush__send_notification($title, $body) {
-  require '../vendor/autoload.php';
-
   $type = "node_webpush_subscription";
   $nodes = node_load_multiple([], ['type' => $type]);
   foreach ($nodes as $node) {
