@@ -280,7 +280,6 @@ function webpush_register__delete_entity(Minishlink\WebPush\Subscription $subscr
 
 function webpush__send_notification($title, $body) {
   require '../vendor/autoload.php';
-  //  $subscription = new
 
   $type = "node_webpush_subscription";
   $nodes = node_load_multiple([], ['type' => $type]);
@@ -300,9 +299,8 @@ function webpush__send_notification($title, $body) {
 
     $payload = $title; // @TODO check what needs to be here
 
-    $webPush = new Minishlink\WebPush\WebPush($auth);
-
     try {
+      $webPush = new Minishlink\WebPush\WebPush($auth);
       $res = $webPush->sendNotification(
         $subscription, // @param Subscription $subscription
         $payload, // @param string|null $payload If you want to send an array, json_encode it
@@ -320,4 +318,3 @@ function webpush__send_notification($title, $body) {
     }
   }
 }
-
