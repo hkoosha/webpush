@@ -57,14 +57,11 @@ function webpush_schema() {
 
 }
 
-
 /**
  * Implements hook_uninstall().
  *
  * At uninstall time we'll notify field.module that the entity was deleted
  * so that attached fields can be cleaned up.
- *
- * @TODO implement this!
  */
 function webpush_uninstall() {
   field_attach_delete_bundle('webpush_subscription', 'webpush_subscription');

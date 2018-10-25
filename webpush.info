@@ -10,7 +10,7 @@ dependencies[] = entity
 ;files[] = includes/webpush_notification/webpush_notification.admin.inc
 ;files[] = includes/webpush_notification/webpush_notification_type.admin.inc
 
-files[] = includes/webpush_subscription.class.inc
+files[] = includes/webpush_subscription.inc
 ;files[] = includes/webpush_subscription/webpush_subscription.type.controller.inc
 ;files[] = includes/webpush_subscription/webpush_subscription.admin.inc
 ;files[] = includes/webpush_subscription/webpush_subscription_type.admin.inc
