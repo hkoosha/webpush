@@ -9,11 +9,12 @@ dependencies[] = entity
 ;files[] = includes/webpush_notification/webpush_notification.type.controller.inc
 ;files[] = includes/webpush_notification/webpush_notification.admin.inc
 ;files[] = includes/webpush_notification/webpush_notification_type.admin.inc
-;files[] = includes/webpush_subscription/webpush_subscription.class.inc
-;files[] = includes/webpush_subscription/webpush_subscription.controller.inc
+
+files[] = includes/webpush_subscription.class.inc
 ;files[] = includes/webpush_subscription/webpush_subscription.type.controller.inc
 ;files[] = includes/webpush_subscription/webpush_subscription.admin.inc
 ;files[] = includes/webpush_subscription/webpush_subscription_type.admin.inc
+
 ;files[] = includes/webpush_topic/webpush_topic.class.inc
 ;files[] = includes/webpush_topic/webpush_topic.controller.inc
 ;files[] = includes/webpush_topic/webpush_topic.type.controller.inc

@@ -54,6 +54,17 @@ function webpush_menu() {
     'page arguments' => ['webpush_admin_configuration_form'],
   ];
 
+  $items['admin/structure/webpush-subscriptions/manage'] = [
+    'title' => 'Administer WebPush subscription entity type',
+    'page callback' => 'webpush_subscription__list',
+    'access arguments' => ['administer webpush'],
+  ];
+
+  $items['admin/structure/webpush-subscriptions/manage/list'] = [
+    'title' => 'Overview',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  ];
+
   return $items;
 }
 
@@ -311,4 +322,73 @@ function webpush__send_notification($title, $body) {
       }
     }
   }
+}
+
+/**
+ * Implements hook_entity_info().
+ */
+function webpush_entity_info() {
+  $info = [];
+
+  $info['webpush_subscription'] = [
+    'label' => 'WebPush subscription',
+    'entity class' => 'WebpushSubscription',
+    'controller class' => 'WebpushSubscriptionController',
+    'views controller class' => 'EntityDefaultViewsController',
+    'base table' => 'webpush_subscription',
+    'access callback' => 'webpush_subscription_access_callback',
+    //    'uri callback' => 'entity_class_uri',
+    'admin ui' => [
+      'path' => 'admin/webpush-subscription',
+      'controller class' => 'EntityDefaultUIController',
+    ],
+    'module' => 'webpush',
+    'fieldable' => TRUE,
+    'bundles' => [
+      'webpush_subscription' => [
+        'label' => 'WebPush subscription',
+        'admin' => [
+          'path' => 'admin/structure/webpush-subscriptions/manage',
+          'access arguments' => ['administer webpush'],
+        ],
+      ],
+    ],
+
+  ];
+
+  return $info;
+}
+
+/**
+ * Implements hook_entity_property_info().
+ */
+function webpush_entity_property_info() {
+  $info = [];
+
+  $info['webpush_subscription']['properties']['subscription'] = [
+    'label' => t('Subscription'),
+    'description' => t('The serialized subscription object (\Minishlink\WebPush\Subscription)'),
+    'type' => 'text',
+    'schema field' => 'subscription',
+  ];
+
+  return $info;
+}
+
+/**
+ * Access callback for WebPush Subscription drupal entity.
+ */
+function webpush_subscription_access_callback() {
+  return user_access('send push notifications');
+}
+
+/**
+ *  @TODO rename and implement
+ */
+function webpush_subscription__list() {
+  $content[] = [
+    '#type' => 'item',
+    '#markup' => t('No entity_example_basic entities currently exist.'),
+  ];
+  return $content;
 }

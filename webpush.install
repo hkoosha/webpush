@@ -20,3 +20,52 @@ function webpush_requirements($phase) {
 
   return $requirements;
 }
+
+/**
+ * Implements hook_schema()
+ *
+ * @return array
+ */
+function webpush_schema() {
+
+  $schema['webpush_subscription'] = [
+    'description' => 'The main table that will store your entities data',
+
+    'fields' => [
+      'id' => [
+        'description' => 'Primary key for webpush subscriptions',
+        'type' => 'serial',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ],
+      'subscription' => [
+        'description' => 'Foreign key to a related node',
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+      ],
+    ],
+
+    'unique keys' => [
+      'id' => ['id'],
+    ],
+
+    'primary key' => ['id'],
+  ];
+
+  return $schema;
+
+}
+
+
+/**
+ * Implements hook_uninstall().
+ *
+ * At uninstall time we'll notify field.module that the entity was deleted
+ * so that attached fields can be cleaned up.
+ *
+ * @TODO implement this!
+ */
+function webpush_uninstall() {
+  field_attach_delete_bundle('webpush_subscription', 'webpush_subscription');
+}
