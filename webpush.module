@@ -26,23 +26,21 @@ function webpush_menu() {
     'type' => MENU_NORMAL_ITEM,
     'title' => 'Webpush',
     'description' => 'Webpush settings.',
-    'access arguments' => ['administer webpush'],
+    'access arguments' => ['send push notifications'],
     'file' => 'webpush.admin.inc',
-
     'page callback' => 'drupal_get_form',
-    'page arguments' => ['webpush_admin_overview_form'],
+    'page arguments' => ['webpush_admin_send_form'],
   ];
 
-  $items['admin/config/services/webpush/overview'] = [
+  $items['admin/config/services/webpush/send'] = [
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    'title' => 'Overview',
-    'description' => 'Webpush settings.',
-    'weight' => -50,
-    'access arguments' => ['administer webpush'],
+    'title' => 'Send notification',
+    'description' => 'Send ush notifications to subscribed users.',
+    'weight' => -100,
+    'access arguments' => ['send push notifications'],
     'file' => 'webpush.admin.inc',
-
     'page callback' => 'drupal_get_form',
-    'page arguments' => ['webpush_admin_overview_form'],
+    'page arguments' => ['webpush_admin_send_form'],
   ];
 
   $items['admin/config/services/webpush/configure'] = [
@@ -51,7 +49,7 @@ function webpush_menu() {
     'description' => 'Webpush settings.',
     'access arguments' => ['administer webpush'],
     'file' => 'webpush.admin.inc',
-
+    'weight' => 100,
     'page callback' => 'drupal_get_form',
     'page arguments' => ['webpush_admin_configuration_form'],
   ];
@@ -68,6 +66,10 @@ function webpush_permission() {
     'administer webpush' => [
       'title' => t('Administer webpush'),
       'description' => t('Set configuration options for webpush.'),
+    ],
+    'send push notifications' => [
+      'title' => t('Send push notifications'),
+      'description' => t('Allows the user to send push notifications.'),
     ],
   ];
 

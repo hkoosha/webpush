@@ -1,15 +1,35 @@
 <?php
 
-function webpush_admin_overview_form() {
+function webpush_admin_send_form() {
   $form = [];
 
-  $form['message'] = [
-    '#type' => 'markup',
-    '#title' => t('Markup'),
-    '#markup' => t('There will be some text here'),
+  $form['title'] = [
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#description' => t('Title description.'),
+    '#required' => TRUE,
+  ];
+
+  $form['body'] = [
+    '#type' => 'textarea',
+    '#title' => t('Body'),
+    '#description' => t('Body description.'),
+    '#required' => TRUE,
+  ];
+
+  $form['submit'] = [
+    '#type' => 'submit',
+    '#value' => t('Send'),
   ];
 
   return $form;
+}
+
+function webpush_admin_send_form_submit($form, &$form_state) {
+  $values = $form_state['values'];
+  dsm($values, 'values');
+
+  drupal_set_message('Form submitted!');
 }
 
 function webpush_admin_configuration_form() {
