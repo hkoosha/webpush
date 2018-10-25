@@ -61,6 +61,22 @@ function webpush_admin_configuration_form() {
     '#required' => TRUE,
   ];
 
+  $collapse = !variable_get('webpush_keep_invalid_subscriptions', FALSE);
+  $form['debug'] = [
+    '#type' => 'fieldset',
+    '#title' => t('Debug'),
+    '#description' => t('Several options that can be used for debugging.'),
+    '#collapsible' => TRUE,
+    '#collapsed' => $collapse,
+  ];
+  $form['debug']['webpush_keep_invalid_subscriptions'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Keep invalid subscriptions'),
+    '#description' => t('Enable this option if you want to keep the subscriptions in your database even if the sending of a notification has failed.'),
+    '#default_value' => variable_get('webpush_keep_invalid_subscriptions', FALSE),
+  ];
+
+
   $form = system_settings_form($form);
 
   return $form;

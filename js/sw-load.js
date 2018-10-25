@@ -41,8 +41,6 @@
         return;
       }
 
-      // .register(Drupal.settings.pwa.path, {scope: Drupal.settings.basePath})
-
       navigator.serviceWorker.register("webpush/serviceworker/js", {scope: '/'})
           .then(() => {
             console.log('[SW] Service worker has been registered');
@@ -51,49 +49,6 @@
             console.error('[SW] Service worker registration failed', e);
             changePushButtonState('incompatible');
           });
-
-      //
-      // /**
-      //  * START send_push_notification
-      //  * this part handles the button that calls the endpoint that triggers a
-      //  * notification in the real world, you wouldn't need this, because
-      //  * notifications are typically sent from backend logic
-      //  */
-      //
-      // const sendPushButton = document.querySelector('#send-push-button');
-      // if (!sendPushButton) {
-      //   return;
-      // }
-      //
-      // sendPushButton.addEventListener('click', () =>
-      //     navigator.serviceWorker.ready
-      //         .then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.getSubscription())
-      //         .then(subscription => {
-      //           if (!subscription) {
-      //             alert('Please enable push notifications');
-      //             return;
-      //           }
-      //
-      //           const key = subscription.getKey('p256dh');
-      //           const token = subscription.getKey('auth');
-      //           const contentEncoding = (PushManager.supportedContentEncodings || ['aesgcm'])[0];
-      //
-      //           fetch('send_push_notification.php', {
-      //             method: 'POST',
-      //             body: JSON.stringify({
-      //               endpoint: subscription.endpoint,
-      //               publicKey: key ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))) : null,
-      //               authToken: token ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth')))) : null,
-      //               contentEncoding,
-      //             })
-      //           })
-      //         })
-      // );
-
-      /**
-       * END send_push_notification
-       */
-
 
       /**
        * **************************************************

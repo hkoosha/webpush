@@ -54,7 +54,6 @@ function webpush_menu() {
     'page arguments' => ['webpush_admin_configuration_form'],
   ];
 
-
   return $items;
 }
 
@@ -197,16 +196,15 @@ function webpush_subscription() {
 /**
  * @TODO we need to make it extendable
  *
- * @param $subscription
+ * @param \Minishlink\WebPush\Subscription $subscription
  *
- * @throws \ErrorException
+ * @param $options
+ *
+ * @throws \Exception
  */
 function webpush_register(Minishlink\WebPush\Subscription $subscription, $options = []) {
   if (!webpush_register__retrieve_entity($subscription)) {
-    try {
-      webpush_register__create_entity($subscription);
-    } catch (Exception $e) {
-    }
+    webpush_register__create_entity($subscription);
   }
 }
 
@@ -214,8 +212,6 @@ function webpush_register(Minishlink\WebPush\Subscription $subscription, $option
  * @TODO this needs to be based on custom entity.
  *
  * @param \Minishlink\WebPush\Subscription $subscription
- *
- * @throws \ErrorException
  */
 function webpush_delete(Minishlink\WebPush\Subscription $subscription) {
   webpush_register__delete_entity($subscription);
@@ -224,7 +220,7 @@ function webpush_delete(Minishlink\WebPush\Subscription $subscription) {
 /**
  * @TODO this needs to be based on custom entity.
  *
- * @param $subscription
+ * @param \Minishlink\WebPush\Subscription $subscription
  *
  * @throws \Exception
  */
@@ -249,10 +245,9 @@ function webpush_register__create_entity(Minishlink\WebPush\Subscription $subscr
 /**
  * @TODO this needs to be based on custom entity.
  *
- * @param $subscription
+ * @param \Minishlink\WebPush\Subscription $subscription
  *
  * @return bool|int|null|string
- * @throws \ErrorException
  */
 function webpush_register__retrieve_entity(Minishlink\WebPush\Subscription $subscription) {
   $serialized = serialize($subscription);
@@ -274,10 +269,9 @@ function webpush_register__retrieve_entity(Minishlink\WebPush\Subscription $subs
 /**
  * @TODO this needs to be based on custom entity.
  *
- * @param $subscription
+ * @param \Minishlink\WebPush\Subscription $subscription
  *
  * @return bool|int|null|string
- * @throws \ErrorException
  */
 function webpush_register__delete_entity(Minishlink\WebPush\Subscription $subscription) {
   $nid = webpush_register__retrieve_entity($subscription);
@@ -286,33 +280,44 @@ function webpush_register__delete_entity(Minishlink\WebPush\Subscription $subscr
 
 function webpush__send_notification($title, $body) {
   require '../vendor/autoload.php';
-//  $subscription = new
+  //  $subscription = new
 
   $type = "node_webpush_subscription";
-  $nodes = node_load_multiple(array(), array('type' => $type));
-  foreach($nodes as $node) {
+  $nodes = node_load_multiple([], ['type' => $type]);
+  foreach ($nodes as $node) {
     $wrapper = entity_metadata_wrapper('node', $node);
 
+    /** @var Minishlink\WebPush\Subscription $subscription */
     $subscription = unserialize($wrapper->field_subscription->value());
 
-    $auth = array(
-      'VAPID' => array(
+    $auth = [
+      'VAPID' => [
         'subject' => $title,
         'publicKey' => variable_get('webpush_public_key', ''),
         'privateKey' => variable_get('webpush_private_key', ''),
-      ),
-    );
+      ],
+    ];
+
+    $payload = $title; // @TODO check what needs to be here
 
     $webPush = new Minishlink\WebPush\WebPush($auth);
 
-    $res = $webPush->sendNotification(
-      $subscription,
-      $title,
-      true
-    );
+    try {
+      $res = $webPush->sendNotification(
+        $subscription, // @param Subscription $subscription
+        $payload, // @param string|null $payload If you want to send an array, json_encode it
+        TRUE // @param bool $flush If you want to flush directly (usually when you send only one notification)
+      // @param array $options Array with several options tied to this notification. If not set, will use the default options that you can set in the WebPush object
+      // @param array $auth Use this auth details instead of what you provided when creating WebPush
+      );
+    } catch (ErrorException $e) {
+      // If we end up here, probably the subscription is not valid anymore, so
+      // we just delete it.
+      $keep_invalid = variable_get('webpush_keep_invalid_subscriptions', FALSE);
+      if (!$keep_invalid) {
+        webpush_register__delete_entity($subscription);
+      }
+    }
   }
-
-
-
 }
 
