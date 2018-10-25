@@ -79,17 +79,24 @@ function webpush_permission() {
 
 }
 
+function webpush_is_enabled() {
+  return variable_get('webpush_public_key', FALSE) && variable_get('webpush_private_key', FALSE);
+}
+
 /**
  * Implements hook_preprocess_html().
  */
 function webpush_preprocess_html(&$variables) {
-  //  if (!user_access('access webpush')) {
-  //    return;
-  //  }
+  if (!webpush_is_enabled() || !user_access('register webpush')) {
+    return;
+  }
 
-  // Load the Service Worker
+  // Load the helper script.
   drupal_add_js(drupal_get_path('module', 'webpush') . '/js/sw-load.js', 'file');
+  // Load the service worker.
   drupal_add_js(['webpush' => ['path' => url('webpush/serviceworker/js')]], 'setting');
+  // Send the public key to js.
+  drupal_add_js(['webpush' => ['applicationServerKey' => variable_get('webpush_public_key', FALSE)]], ['type' => 'setting']);
 }
 
 

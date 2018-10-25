@@ -1,8 +1,12 @@
-(function ($) {
+(function ($, Drupal) {
   Drupal.behaviors.webPush = {
     attach: function (context, settings) {
 
-      const applicationServerKey = "BP54FpvHs0xNxwpuhqNXy2MCC5gkEetrzo0B4cWZzDL9N_0U4V5U2oXZ8Lcnss6BS5XHhtu9gfWt6YTN2pELYpg";
+      const applicationServerKey = ('webpush' in Drupal.settings) ? Drupal.settings.webpush.applicationServerKey : false;
+      if (!applicationServerKey) {
+        return;
+      }
+
       let isPushEnabled = false;
 
       // If there is no subscription related button, nothing to do here.
@@ -266,4 +270,4 @@
 
     }
   };
-})(jQuery);
+})(jQuery, Drupal);
