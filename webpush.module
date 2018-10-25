@@ -8,7 +8,7 @@ function webpush_menu() {
 
   $items['webpush/serviceworker/js'] = [
     'page callback' => 'webpush_serviceworker_file_data',
-//    'access arguments' => ['access webpush'],
+    //    'access arguments' => ['access webpush'],
     'access callback' => TRUE,
     'delivery callback' => 'webpush_deliver_js_file',
     'file' => 'webpush.pages.inc',
@@ -22,39 +22,39 @@ function webpush_menu() {
     'access callback' => TRUE,
   ];
 
-  $items['admin/config/services/webpush'] = array(
+  $items['admin/config/services/webpush'] = [
     'type' => MENU_NORMAL_ITEM,
     'title' => 'Webpush',
     'description' => 'Webpush settings.',
-    'access arguments' => array('administer webpush'),
+    'access arguments' => ['administer webpush'],
     'file' => 'webpush.admin.inc',
 
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('webpush_admin_overview_form'),
-  );
+    'page arguments' => ['webpush_admin_overview_form'],
+  ];
 
-  $items['admin/config/services/webpush/overview'] = array(
+  $items['admin/config/services/webpush/overview'] = [
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'title' => 'Overview',
     'description' => 'Webpush settings.',
     'weight' => -50,
-    'access arguments' => array('administer webpush'),
+    'access arguments' => ['administer webpush'],
     'file' => 'webpush.admin.inc',
 
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('webpush_admin_overview_form'),
-  );
+    'page arguments' => ['webpush_admin_overview_form'],
+  ];
 
-  $items['admin/config/services/webpush/configure'] = array(
+  $items['admin/config/services/webpush/configure'] = [
     'type' => MENU_LOCAL_TASK,
     'title' => 'Configuration',
     'description' => 'Webpush settings.',
-    'access arguments' => array('administer webpush'),
+    'access arguments' => ['administer webpush'],
     'file' => 'webpush.admin.inc',
 
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('webpush_admin_configuration_form'),
-  );
+    'page arguments' => ['webpush_admin_configuration_form'],
+  ];
 
 
   return $items;
@@ -64,12 +64,12 @@ function webpush_menu() {
  * Implements hook_permission().
  */
 function webpush_permission() {
-  return array(
-    'administer webpush' => array(
+  return [
+    'administer webpush' => [
       'title' => t('Administer webpush'),
       'description' => t('Set configuration options for webpush.'),
-    ),
-  );
+    ],
+  ];
 
 }
 
@@ -77,15 +77,14 @@ function webpush_permission() {
  * Implements hook_preprocess_html().
  */
 function webpush_preprocess_html(&$variables) {
-//  if (!user_access('access webpush')) {
-//    return;
-//  }
+  //  if (!user_access('access webpush')) {
+  //    return;
+  //  }
 
   // Load the Service Worker
-  drupal_add_js(drupal_get_path('module', 'webpush') .'/js/sw-load.js', 'file');
+  drupal_add_js(drupal_get_path('module', 'webpush') . '/js/sw-load.js', 'file');
   drupal_add_js(['webpush' => ['path' => url('webpush/serviceworker/js')]], 'setting');
 }
-
 
 
 /**
@@ -119,30 +118,30 @@ function webpush_block_view($delta = '') {
 function _webpush_block_build() {
 
   // Capture the image file path and form into HTML with attributes
-//  $image_file = file_load(variable_get('block_image_fid', ''));
-//  $image_path = '';
+  //  $image_file = file_load(variable_get('block_image_fid', ''));
+  //  $image_path = '';
 
-//  if (isset($image_file->uri)) {
-//    $image_path = $image_file->uri;
-//  }
+  //  if (isset($image_file->uri)) {
+  //    $image_path = $image_file->uri;
+  //  }
 
-//  $image = theme_image([
-//    'path' => ($image_path),
-//    'alt' => t('Image description here.'),
-//    'title' => t('This is our block image.'),
-//    'attributes' => ['class' => 'class_name'],
-//  ]);
+  //  $image = theme_image([
+  //    'path' => ($image_path),
+  //    'alt' => t('Image description here.'),
+  //    'title' => t('This is our block image.'),
+  //    'attributes' => ['class' => 'class_name'],
+  //  ]);
 
   // Capture WYSIWYG text from the variable
-//  $text = variable_get('text_variable', '');
+  //  $text = variable_get('text_variable', '');
 
   // Block output in HTML with div wrapper
   $block = [
-//    'image' => [
-//      '#prefix' => '',
-//      '#type' => 'markup',
-//      '#markup' => $image,
-//    ],
+    //    'image' => [
+    //      '#prefix' => '',
+    //      '#type' => 'markup',
+    //      '#markup' => $image,
+    //    ],
     'message' => [
       '#type' => 'markup',
       '#markup' => '<div id="webpush-subscription-button" style="background-color: yellow; cursor: pointer; color: red; font-size: 28px; padding: 50px; position: fixed; left: 20px; bottom: 50px; z-index: 999;">HERE</div>',
@@ -182,8 +181,8 @@ function webpush_register($subscription, $options = []) {
   if (!webpush_register__retrieve_entity($subscription)) {
     try {
       webpush_register__create_entity($subscription);
+    } catch (Exception $e) {
     }
-    catch (Exception $e) { }
   }
 }
 
