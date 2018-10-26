@@ -10,9 +10,16 @@ self.addEventListener('push', function (event) {
     const title = payloadParsed.title;
     const options = {
       'body': payloadParsed.body,
-      'icon': payloadParsed.icon,
-      'badge': payloadParsed.badge
+      'data': {
+        'url': payloadParsed.url
+      }
     };
+    if (payloadParsed.icon) {
+      options.icon = payloadParsed.icon;
+    }
+    if (payloadParsed.badge) {
+      options.badge = payloadParsed.badge;
+    }
 
     return self.registration.showNotification(title, options);
   };
@@ -21,4 +28,10 @@ self.addEventListener('push', function (event) {
     const message = event.data.text();
     event.waitUntil(sendNotification(message));
   }
+});
+
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  Promise.resolve();
+  clients.openWindow(event.notification.data.url);
 });

@@ -296,6 +296,7 @@ function webpush_subscription__get_all() {
  * @param $body
  */
 function webpush__send_notification($title, $body) {
+  global $base_url;
   $subscriptions = webpush_subscription__get_all();
 
   foreach ($subscriptions as $subscription_entity) {
@@ -315,6 +316,7 @@ function webpush__send_notification($title, $body) {
     $payload = [
       'title' => $title,
       'body' => $body,
+      'url' => $base_url,
     ];
     if ($icon = variable_get('webpush_icon_fid', '')) {
       $file = file_load($icon);
