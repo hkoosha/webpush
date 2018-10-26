@@ -331,6 +331,8 @@ function webpush__send_notification($title, $body) {
       $payload['badge'] = $url;
     }
 
+    // @TODO implement also an "image" (here, and in JS)
+
     try {
       $webPush = new Minishlink\WebPush\WebPush($auth);
       $result = $webPush->sendNotification(

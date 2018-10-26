@@ -108,14 +108,25 @@ function webpush_admin_configuration_form() {
 }
 
 function webpush_admin_configuration_form_submit__images($form, &$form_state) {
+
+  // @TODO consider adding a validation function, to unset the images from $form_state if they are already stored
+  // Leave it like that for now!
+
+  $files = [];
+
   if ($form_state['values']['webpush_icon_fid']) {
-    $file = file_load($form_state['values']['webpush_icon_fid']);
-    $file->status = FILE_STATUS_PERMANENT;
-    file_save($file);
+    $files[] = file_load($form_state['values']['webpush_icon_fid']);
   }
   if ($form_state['values']['webpush_badge_fid']) {
-    $file = file_load($form_state['values']['webpush_badge_fid']);
-    $file->status = FILE_STATUS_PERMANENT;
-    file_save($file);
+    $files[] = file_load($form_state['values']['webpush_badge_fid']);
+  }
+  if ($files) {
+    foreach ($files as $file) {
+      if ($file->status !== FILE_STATUS_PERMANENT) {
+        $file->status = FILE_STATUS_PERMANENT;
+        file_save($file);
+        file_usage_add($file, 'webpush', 'admin', 1);
+      }
+    }
   }
 }
