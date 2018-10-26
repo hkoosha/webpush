@@ -1,6 +1,25 @@
 <?php
 
 /**
+ *
+ * Things left todo:
+ *
+ * 1) batch
+ *
+ * 2) fix states of button (bell)
+ *
+ * 3) Implement log entity
+ *
+ * 4) Implement topics on separate module
+ *
+ * 5) Implement user control panel for topics
+ *
+ * 6) queue
+ */
+
+
+
+/**
  * Implements hook_menu().
  */
 function webpush_menu() {
