@@ -194,6 +194,8 @@ function webpush_subscription() {
 }
 
 /**
+ * Callback function for registering a new subscription.
+ *
  * @TODO we need to make it extendable
  *
  * @param \Minishlink\WebPush\Subscription $subscription
@@ -209,7 +211,7 @@ function webpush_register(Minishlink\WebPush\Subscription $subscription, $option
 }
 
 /**
- * @TODO this needs to be based on custom entity.
+ * Callback function for deleting a subscription.
  *
  * @param \Minishlink\WebPush\Subscription $subscription
  */
@@ -218,7 +220,7 @@ function webpush_delete(Minishlink\WebPush\Subscription $subscription) {
 }
 
 /**
- * @TODO this needs to be based on custom entity.
+ * Creates a new webpush_subscription entity that hosts the subscription.
  *
  * @param \Minishlink\WebPush\Subscription $subscription
  *
@@ -227,21 +229,15 @@ function webpush_delete(Minishlink\WebPush\Subscription $subscription) {
 function webpush_register__create_entity(Minishlink\WebPush\Subscription $subscription) {
   $serialized = serialize($subscription);
 
-  $node = new stdClass();
-  $node->title = rand();
-  $node->type = "node_webpush_subscription";
-  node_object_prepare($node);
-  $node->language = LANGUAGE_NONE;
-  $node->status = 1;
-  $node->promote = 0;
-  $node->comment = 0;
-  $node->field_subscription[$node->language][]['value'] = $serialized;
-  $node = node_submit($node); // Prepare node for saving
-  node_save($node);
+  $entity_type = 'webpush_subscription';
+  $entity = entity_create($entity_type, [
+    'subscription' => $serialized,
+  ]);
+  $entity->save();
 }
 
 /**
- * @TODO this needs to be based on custom entity.
+ * Retrieve the id of the entity that hosts the subscription.
  *
  * @param \Minishlink\WebPush\Subscription $subscription
  *
@@ -252,38 +248,61 @@ function webpush_register__retrieve_entity(Minishlink\WebPush\Subscription $subs
 
   $query = new EntityFieldQuery();
   $query
-    ->entityCondition('entity_type', 'node')
-    ->entityCondition('bundle', 'node_webpush_subscription')
-    ->fieldCondition('field_subscription', 'value', $serialized)
+    ->entityCondition('entity_type', 'webpush_subscription')
+    ->propertyCondition('subscription', $serialized)
     ->addMetaData('account', user_load(1)); // Run the query as user 1.
   $result = $query->execute();
-  if (isset($result['node'])) {
-    reset($result['node']);
-    return key($result['node']);
+  if (isset($result['webpush_subscription'])) {
+    reset($result['webpush_subscription']);
+    return key($result['webpush_subscription']);
   }
   return FALSE;
 }
 
 /**
- * @TODO this needs to be based on custom entity.
+ * Deletes the webpush_subscription entity that hosts the subscription.
  *
  * @param \Minishlink\WebPush\Subscription $subscription
  *
  * @return bool|int|null|string
  */
 function webpush_register__delete_entity(Minishlink\WebPush\Subscription $subscription) {
-  $nid = webpush_register__retrieve_entity($subscription);
-  node_delete($nid);
+  $id = webpush_register__retrieve_entity($subscription);
+  entity_delete('webpush_subscription', $id);
 }
 
+/**
+ * Returns an array with the IDs of all the webpush_subscription entities.
+ *
+ * @return array|bool
+ */
+function webpush_subscription__get_all() {
+  $query = new EntityFieldQuery();
+  $query
+    ->entityCondition('entity_type', 'webpush_subscription')
+    ->addMetaData('account', user_load(1)); // Run the query as user 1.
+  $result = $query->execute();
+  if (isset($result['webpush_subscription'])) {
+    return array_keys($result['webpush_subscription']);
+  }
+  return FALSE;
+
+}
+
+/**
+ * Initiates the notification sending procedure.
+ *
+ * @param $title
+ * @param $body
+ */
 function webpush__send_notification($title, $body) {
-  $type = "node_webpush_subscription";
-  $nodes = node_load_multiple([], ['type' => $type]);
-  foreach ($nodes as $node) {
-    $wrapper = entity_metadata_wrapper('node', $node);
+  $subscriptions = webpush_subscription__get_all();
+
+  foreach ($subscriptions as $subscription) {
+    $wrapper = entity_metadata_wrapper('webpush_subscription', $subscription);
 
     /** @var Minishlink\WebPush\Subscription $subscription */
-    $subscription = unserialize($wrapper->field_subscription->value());
+    $subscription = unserialize($wrapper->subscription->value());
 
     $auth = [
       'VAPID' => [
@@ -338,13 +357,8 @@ function webpush_subscription_access_callback() {
   return user_access('send push notifications');
 }
 
-/**
- *  @TODO rename. move to class file, and implement
- */
-function webpush_subscription__list() {
-  $content[] = [
-    '#type' => 'item',
-    '#markup' => t('No entity_example_basic entities currently exist.'),
-  ];
-  return $content;
+function webpush_subscription__count() {
+  $query = "SELECT COUNT(id) FROM {webpush_subscription}";
+  $total = db_query($query)->fetchField();
+  return $total;
 }

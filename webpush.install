@@ -39,7 +39,7 @@ function webpush_schema() {
         'unsigned' => TRUE,
       ],
       'subscription' => [
-        'description' => 'Foreign key to a related node',
+        'description' => 'Serialized object of type Minishlink\WebPush\Subscription',
         'type' => 'text',
         'size' => 'normal',
         'not null' => TRUE,

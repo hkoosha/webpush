@@ -24,6 +24,9 @@ function _webpush_entity_info() {
     'controller class' => 'WebpushSubscriptionController',
     'views controller class' => 'EntityDefaultViewsController',
     'base table' => 'webpush_subscription',
+    'entity keys' => [
+      'id' => 'id',
+    ],
     'access callback' => 'webpush_subscription_access_callback',
     //    'uri callback' => 'entity_class_uri',
     'admin ui' => [
@@ -64,15 +67,25 @@ function _webpush_subscription_menu() {
   $items = [];
 
   $items['admin/structure/webpush-subscription/manage'] = [
-    'title' => 'Administer WebPush subscription entity type',
-    'page callback' => 'webpush_subscription__list',
+    'title' => 'WebPush subscriptions',
+    'page callback' => 'webpush_subscription__overview',
+    'file' => 'includes/webpush_subscription.inc',
     'access arguments' => ['administer webpush'],
   ];
 
   $items['admin/structure/webpush-subscription/manage/list'] = [
     'title' => 'Overview',
     'type' => MENU_DEFAULT_LOCAL_TASK,
+    'access arguments' => ['send push notifications'],
   ];
 
   return $items;
+}
+
+function webpush_subscription__overview() {
+  $count = webpush_subscription__count();
+  $content[] = [
+    '#markup' => t('You have !number push notification subscriptions.', ['!number' => $count]),
+  ];
+  return $content;
 }
