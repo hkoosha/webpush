@@ -37,7 +37,7 @@
       // changes the permission manually
       if (Notification.permission === 'denied') {
         console.warn('Notifications are denied by the user');
-        changePushButtonState('userdenied');
+        changePushButtonState('userdenied', $pushButton);
         return;
       }
 
@@ -47,7 +47,7 @@
             push_updateSubscription();
           }, e => {
             console.error('[SW] Service worker registration failed', e);
-            changePushButtonState('incompatible');
+            changePushButtonState('incompatible', $pushButton);
           });
 
       /**
@@ -59,26 +59,26 @@
       function unsupportedFeatures() {
         if (!('serviceWorker' in navigator)) {
           console.warn("Service workers are not supported by this browser");
-          changePushButtonState('incompatible');
+          changePushButtonState('incompatible', $pushButton);
           return true;
         }
 
         if (!('PushManager' in window)) {
           console.warn('Push notifications are not supported by this browser');
-          changePushButtonState('incompatible');
+          changePushButtonState('incompatible', $pushButton);
           return true;
         }
 
         if (!('showNotification' in ServiceWorkerRegistration.prototype)) {
           console.warn('Notifications are not supported by this browser');
-          changePushButtonState('incompatible');
+          changePushButtonState('incompatible', $pushButton);
           return true;
         }
         return false;
       }
 
       function push_subscribe() {
-        changePushButtonState('computing');
+        changePushButtonState('computing', $pushButton);
 
         navigator.serviceWorker.ready
             .then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.subscribe({
@@ -90,7 +90,7 @@
               // create subscription on your server
               return push_sendSubscriptionToServer(subscription, 'POST');
             })
-            .then(subscription => subscription && changePushButtonState('enabled')) // update your UI
+            .then(subscription => subscription && changePushButtonState('enabled', $pushButton)) // update your UI
             .catch(e => {
               if (Notification.permission === 'denied') {
                 // The user denied the notification permission which
@@ -98,19 +98,19 @@
                 // to manually change the notification permission to
                 // subscribe to push messages
                 console.warn('Notifications are denied by the user.');
-                changePushButtonState('userdenied');
+                changePushButtonState('userdenied', $pushButton);
               }
               else {
                 // A problem occurred with the subscription; common reasons
                 // include network errors or the user skipped the permission
                 console.error('Impossible to subscribe to push notifications', e);
-                changePushButtonState('disabled');
+                changePushButtonState('disabled', $pushButton);
               }
             });
       }
 
       function push_unsubscribe() {
-        changePushButtonState('computing');
+        changePushButtonState('computing', $pushButton);
 
         // To unsubscribe from push messaging, you need to get the subscription
         // object
@@ -121,7 +121,7 @@
               if (!subscription) {
                 // No subscription object, so set the state
                 // to allow the user to subscribe to push
-                changePushButtonState('disabled');
+                changePushButtonState('disabled', $pushButton);
                 return;
               }
 
@@ -130,28 +130,30 @@
               return push_sendSubscriptionToServer(subscription, 'DELETE');
             })
             .then(subscription => subscription.unsubscribe())
-            .then(() => changePushButtonState('disabled'))
+            .then(() => changePushButtonState('disabled', $pushButton))
             .catch(e => {
               // We failed to unsubscribe, this can lead to
               // an unusual state, so  it may be best to remove
               // the users data from your data store and
               // inform the user that you have done so
               console.error('Error when unsubscribing the user', e);
-              changePushButtonState('disabled');
+              changePushButtonState('disabled', $pushButton);
             });
       }
 
-      function changePushButtonState(state) {
+      function changePushButtonState(state, $pushButton) {
         switch (state) {
           case 'enabled':
             $pushButton.disabled = false;
             $pushButton.text("Disable Push notifications");
             isPushEnabled = true;
+            $pushButton.addClass('enabled');
             break;
           case 'disabled':
             $pushButton.disabled = false;
             $pushButton.text("Enable Push notifications");
             isPushEnabled = false;
+            $pushButton.addClass('disabled');
             break;
           case 'computing':
             $pushButton.disabled = true;
@@ -160,13 +162,16 @@
           case 'incompatible':
             $pushButton.disabled = true;
             $pushButton.text("Push notifications are not compatible with this browser");
+            $pushButton.addClass('disabled');
             break;
           case 'userdenied':
             $pushButton.disabled = true;
             $pushButton.text("The user has denied push notifications");
+            $pushButton.addClass('disabled');
             break;
           default:
             console.error('Unhandled push button state', state);
+            $pushButton.addClass('disabled');
             break;
         }
       }
@@ -191,7 +196,7 @@
       function push_updateSubscription() {
         navigator.serviceWorker.ready.then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.getSubscription())
             .then(subscription => {
-              changePushButtonState('disabled');
+              changePushButtonState('disabled', $pushButton);
 
               if (!subscription) {
                 // We aren't subscribed to push, so set UI to allow the user to
@@ -202,7 +207,7 @@
               // Keep your server in sync with the latest endpoint
               return push_sendSubscriptionToServer(subscription, 'PUT');
             })
-            .then(subscription => subscription && changePushButtonState('enabled')) // Set your UI to show they have subscribed for push messages
+            .then(subscription => subscription && changePushButtonState('enabled', $pushButton)) // Set your UI to show they have subscribed for push messages
             .catch(e => {
               console.error('Error when updating the subscription', e);
             });

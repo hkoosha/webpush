@@ -1,0 +1,22 @@
+#webpush-subscription-button {
+  background-color: yellow;
+  background-repeat: no-repeat;
+  background-position: center center;
+  color: red;
+  font-size: 28px;
+  padding: 50px;
+  position: fixed;
+  left: 20px;
+  bottom: 50px;
+  z-index: 999;
+}
+
+#webpush-subscription-button.enabled {
+  background-image: url('../images/bell-black.png');
+  cursor: pointer;
+}
+
+#webpush-subscription-button.disabled {
+  background-image: url('../images/bell-grey.png');
+  cursor: not-allowed;
+}

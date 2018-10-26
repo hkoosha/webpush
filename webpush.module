@@ -158,10 +158,14 @@ function _webpush_block_build() {
     //    ],
     'message' => [
       '#type' => 'markup',
-      '#markup' => '<div id="webpush-subscription-button" style="background-color: yellow; cursor: pointer; color: red; font-size: 28px; padding: 50px; position: fixed; left: 20px; bottom: 50px; z-index: 999;">HERE</div>',
+      '#markup' => '<div id="webpush-subscription-button">HERE</div>',
       '#suffix' => '',
     ],
   ];
+
+  // Add some css.
+  drupal_add_css(drupal_get_path('module', 'webpush') . '/css/webpush_bell.css');
+
   return $block;
 }
 
