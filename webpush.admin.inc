@@ -3,6 +3,14 @@
 function webpush_admin_send_form() {
   $form = [];
 
+  if (!webpush_subscription__count()) {
+    return [
+      'no_subscriptions_message' => [
+        '#markup' => t('You need to have at least one registered subscription in order to send a push notification, but it seems that you have none.'),
+      ],
+    ];
+  }
+
   $form['title'] = [
     '#type' => 'textfield',
     '#title' => t('Title'),
@@ -160,9 +168,7 @@ function webpush_admin_send_form_submit($form, &$form_state) {
   }
   dsm($values, 'values');
 
-  drupal_set_message('Form submitted!');
-
-  webpush__send_notification($title, $body, $link);
+  batch_set(webpush__send_notification_batch($title, $body, $link));
 }
 
 function webpush_admin_configuration_form() {
