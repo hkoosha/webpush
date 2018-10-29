@@ -24,10 +24,10 @@
       this.pushButton.once('webpush-subscription-click', function () {
         $(this).click(function () {
           if (Drupal.behaviors.webPush.isPushEnabled) {
-            push_unsubscribe();
+            Drupal.behaviors.webPush.fn.push_unsubscribe();
           }
           else {
-            push_subscribe();
+            Drupal.behaviors.webPush.fn.push_subscribe();
           }
         });
       });
@@ -55,71 +55,6 @@
        * **************** Helper functions ****************
        * **************************************************
        */
-
-
-      function push_subscribe() {
-        Drupal.behaviors.webPush.fn.changePushButtonState('computing');
-
-        navigator.serviceWorker.ready
-            .then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.subscribe({
-              userVisibleOnly: true,
-              applicationServerKey: Drupal.behaviors.webPush.fn.urlBase64ToUint8Array(Drupal.behaviors.webPush.applicationServerKey),
-            }))
-            .then(subscription => {
-              // Subscription was successful
-              // create subscription on your server
-              return Drupal.behaviors.webPush.fn.push_sendSubscriptionToServer(subscription, 'POST');
-            })
-            .then(subscription => subscription && Drupal.behaviors.webPush.fn.changePushButtonState('enabled')) // update your UI
-            .catch(e => {
-              if (Notification.permission === 'denied') {
-                // The user denied the notification permission which
-                // means we failed to subscribe and the user will need
-                // to manually change the notification permission to
-                // subscribe to push messages
-                console.warn('Notifications are denied by the user.');
-                Drupal.behaviors.webPush.fn.changePushButtonState('userdenied');
-              }
-              else {
-                // A problem occurred with the subscription; common reasons
-                // include network errors or the user skipped the permission
-                console.error('Impossible to subscribe to push notifications', e);
-                Drupal.behaviors.webPush.fn.changePushButtonState('disabled');
-              }
-            });
-      }
-
-      function push_unsubscribe() {
-        Drupal.behaviors.webPush.fn.changePushButtonState('computing');
-
-        // To unsubscribe from push messaging, you need to get the subscription
-        // object
-        navigator.serviceWorker.ready
-            .then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.getSubscription())
-            .then(subscription => {
-              // Check that we have a subscription to unsubscribe
-              if (!subscription) {
-                // No subscription object, so set the state
-                // to allow the user to subscribe to push
-                Drupal.behaviors.webPush.fn.changePushButtonState('disabled');
-                return;
-              }
-
-              // We have a subscription, unsubscribe
-              // Remove push subscription from server
-              return Drupal.behaviors.webPush.fn.push_sendSubscriptionToServer(subscription, 'DELETE');
-            })
-            .then(subscription => subscription.unsubscribe())
-            .then(() => Drupal.behaviors.webPush.fn.changePushButtonState('disabled'))
-            .catch(e => {
-              // We failed to unsubscribe, this can lead to
-              // an unusual state, so  it may be best to remove
-              // the users data from your data store and
-              // inform the user that you have done so
-              console.error('Error when unsubscribing the user', e);
-              Drupal.behaviors.webPush.fn.changePushButtonState('disabled', $pushButton);
-            });
-      }
 
 
     },
@@ -241,8 +176,71 @@
             .catch(e => {
               console.error('Error when updating the subscription', e);
             });
-      }
+      },
 
+      push_subscribe: function () {
+        Drupal.behaviors.webPush.fn.changePushButtonState('computing');
+
+        navigator.serviceWorker.ready
+            .then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: Drupal.behaviors.webPush.fn.urlBase64ToUint8Array(Drupal.behaviors.webPush.applicationServerKey),
+            }))
+            .then(subscription => {
+              // Subscription was successful
+              // create subscription on your server
+              return Drupal.behaviors.webPush.fn.push_sendSubscriptionToServer(subscription, 'POST');
+            })
+            .then(subscription => subscription && Drupal.behaviors.webPush.fn.changePushButtonState('enabled')) // update your UI
+            .catch(e => {
+              if (Notification.permission === 'denied') {
+                // The user denied the notification permission which
+                // means we failed to subscribe and the user will need
+                // to manually change the notification permission to
+                // subscribe to push messages
+                console.warn('Notifications are denied by the user.');
+                Drupal.behaviors.webPush.fn.changePushButtonState('userdenied');
+              }
+              else {
+                // A problem occurred with the subscription; common reasons
+                // include network errors or the user skipped the permission
+                console.error('Impossible to subscribe to push notifications', e);
+                Drupal.behaviors.webPush.fn.changePushButtonState('disabled');
+              }
+            });
+      },
+
+      push_unsubscribe: function () {
+        Drupal.behaviors.webPush.fn.changePushButtonState('computing');
+
+        // To unsubscribe from push messaging, you need to get the subscription
+        // object
+        navigator.serviceWorker.ready
+            .then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.getSubscription())
+            .then(subscription => {
+              // Check that we have a subscription to unsubscribe
+              if (!subscription) {
+                // No subscription object, so set the state
+                // to allow the user to subscribe to push
+                Drupal.behaviors.webPush.fn.changePushButtonState('disabled');
+                return;
+              }
+
+              // We have a subscription, unsubscribe
+              // Remove push subscription from server
+              return Drupal.behaviors.webPush.fn.push_sendSubscriptionToServer(subscription, 'DELETE');
+            })
+            .then(subscription => subscription.unsubscribe())
+            .then(() => Drupal.behaviors.webPush.fn.changePushButtonState('disabled'))
+            .catch(e => {
+              // We failed to unsubscribe, this can lead to
+              // an unusual state, so  it may be best to remove
+              // the users data from your data store and
+              // inform the user that you have done so
+              console.error('Error when unsubscribing the user', e);
+              Drupal.behaviors.webPush.fn.changePushButtonState('disabled', $pushButton);
+            });
+      },
 
     },
 
