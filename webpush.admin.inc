@@ -17,6 +17,37 @@ function webpush_admin_send_form() {
     '#required' => TRUE,
   ];
 
+  $form['link'] = [
+    '#type' => 'fieldset',
+    '#title' => t('Link'),
+  ];
+  $form['link']['link_type'] = [
+    '#type' => 'radios',
+    '#title' => t('Link type'),
+    '#options' => webpush_link_type_options(),
+    '#default_value' => variable_get('webpush_link_type', 'node'),
+  ];
+  $form['link']['link_node'] = [
+    '#type' => 'textfield',
+    '#title' => t('Node'),
+    '#description' => t('Autocomplete field'),
+    '#states' => [
+      'visible' => [
+        ':input[name="link_type"]' => ['value' => 'node'],
+      ],
+    ],
+    '#autocomplete_path' => 'webpush/autocomplete-node',
+  ];
+  $form['link']['link_custom'] = [
+    '#type' => 'textfield',
+    '#title' => t('Custom link'),
+    '#states' => [
+      'visible' => [
+        ':input[name="link_type"]' => ['value' => 'custom'],
+      ],
+    ],
+  ];
+
   $form['submit'] = [
     '#type' => 'submit',
     '#value' => t('Send'),
@@ -25,15 +56,113 @@ function webpush_admin_send_form() {
   return $form;
 }
 
+function webpush_link_type_options() {
+  return [
+    'node' => t('Node'),
+    'frontpage' => t('Frontpage'),
+    'custom' => t('Custom'),
+    'none' => t('None'),
+  ];
+}
+
+function webpush_autocomplete_node_callback($string = "") {
+  $matches = [];
+  if ($string) {
+    $result = db_select('node')
+      ->fields('node', ['nid', 'title'])
+      ->condition('title', db_like($string) . '%', 'LIKE')
+      ->range(0, 10)
+      ->execute();
+    foreach ($result as $node) {
+      $matches[$node->title . " [$node->nid]"] = check_plain($node->title);
+    }
+  }
+
+  drupal_json_output($matches);
+}
+
+function webpush_admin_send_form_validate(&$form, &$form_state) {
+  $values = $form_state['values'];
+
+  if ($values['link_type'] == 'node') {
+    $title = $values['link_node'];
+    if (empty($title)) {
+      form_error($form['link']['link_node'], t('You need to select a valid node.'));
+      return FALSE;
+    }
+    $matches = [];
+
+    // This preg_match() looks for the last pattern like [33334] and if found
+    // extracts the numeric portion.
+    $result = preg_match('/\[([0-9]+)\]$/', $title, $matches);
+    if ($result > 0) {
+      // If $result is nonzero, we found a match and can use it as the index into
+      // $matches.
+      $nid = $matches[$result];
+      // Verify that it's a valid nid.
+      $node = node_load($nid);
+      if (empty($node)) {
+        form_error($form['link']['link_node'], t('No node with nid %nid can be found', ['%nid' => $nid]));
+        return FALSE;
+      }
+    }
+    // BUT: Not everybody will have javascript turned on, or they might hit ESC
+    // and not use the autocomplete values offered. In that case, we can attempt
+    // to come up with a useful value. This is not absolutely necessary, and we
+    // *could* just emit a form_error() as below.
+    else {
+      $nid = db_select('node')
+        ->fields('node', ['nid'])
+        ->condition('title', db_like($title) . '%', 'LIKE')
+        ->range(0, 1)
+        ->execute()
+        ->fetchField();
+    }
+
+    // Now, if we somehow found a nid, assign it to the node. If we failed, emit
+    // an error.
+    if (!empty($nid)) {
+      $form_state['values']['link_node'] = $nid;
+    }
+    else {
+      form_error($form['link']['link_node'], t('No node starting with %title can be found', ['%title' => $title]));
+      return FALSE;
+    }
+
+  }
+  elseif ($values['link_type'] == 'custom') {
+    if (!valid_url($values['link_custom'], TRUE)) {
+      form_error($form['link']['link_custom'], t('The url you typed is not valid. It has to begin with http:// or https://'));
+      return FALSE;
+    }
+  }
+}
+
 function webpush_admin_send_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $title = $values['title'];
   $body = $values['body'];
+  switch ($values['link_type']) {
+    case 'node':
+      $link = '/' . drupal_get_path_alias('node/' . $values['link_node']);
+      break;
+    case 'custom':
+      $link = $values['link_custom'];
+      break;
+    case 'frontpage':
+      global $base_url;
+      $link = $base_url;
+      break;
+    case 'none':
+    default:
+      $link = FALSE;
+      break;
+  }
   dsm($values, 'values');
 
   drupal_set_message('Form submitted!');
 
-  webpush__send_notification($title, $body);
+  webpush__send_notification($title, $body, $link);
 }
 
 function webpush_admin_configuration_form() {
@@ -43,8 +172,9 @@ function webpush_admin_configuration_form() {
     '#type' => 'fieldset',
     '#title' => t('App keys'),
     '#description' => t('App keys'),
+    '#collapsible' => TRUE,
+    '#collapsed' => webpush_is_enabled(),
   ];
-
   $form['app_keys']['webpush_public_key'] = [
     '#type' => 'textfield',
     '#title' => t('Public key'),
@@ -52,7 +182,6 @@ function webpush_admin_configuration_form() {
     '#default_value' => variable_get('webpush_public_key', ''),
     '#required' => TRUE,
   ];
-
   $form['app_keys']['webpush_private_key'] = [
     '#type' => 'textfield',
     '#title' => t('Private key'),
@@ -60,10 +189,17 @@ function webpush_admin_configuration_form() {
     '#default_value' => variable_get('webpush_private_key', ''),
     '#required' => TRUE,
   ];
+
   $form['default_values'] = [
     '#type' => 'fieldset',
     '#title' => t('Default values'),
     '#description' => t('Default values for your notification messages.'),
+  ];
+  $form['default_values']['webpush_link_type'] = [
+    '#type' => 'radios',
+    '#title' => t('Link type'),
+    '#options' => webpush_link_type_options(),
+    '#default_value' => variable_get('webpush_link_type', 'node'),
   ];
   $form['default_values']['webpush_icon_fid'] = [
     '#type' => 'managed_file',

@@ -4,6 +4,8 @@
  *
  * Things left todo:
  *
+ * 0) Links!!
+ *
  * 1) batch
  *
  * 2) fix states of button (bell)
@@ -16,7 +18,6 @@
  *
  * 6) queue
  */
-
 
 
 /**
@@ -75,6 +76,14 @@ function webpush_menu() {
 
   // Items related to WebPush Subscription entity.
   $items += _webpush_subscription_menu();
+
+  $items['webpush/autocomplete-node'] = [
+    'page callback' => 'webpush_autocomplete_node_callback',
+    'type' => MENU_CALLBACK,
+    'file' => 'webpush.admin.inc',
+    'access arguments' => ['send push notifications'],
+  ];
+
 
   return $items;
 }
@@ -317,9 +326,9 @@ function webpush_subscription__get_all() {
  *
  * @param $title
  * @param $body
+ * @param $link
  */
-function webpush__send_notification($title, $body) {
-  global $base_url;
+function webpush__send_notification($title, $body, $link) {
   $subscriptions = webpush_subscription__get_all();
 
   foreach ($subscriptions as $subscription_entity) {
@@ -339,8 +348,10 @@ function webpush__send_notification($title, $body) {
     $payload = [
       'title' => $title,
       'body' => $body,
-      'url' => $base_url,
     ];
+    if ($link) {
+      $payload['url'] = $link;
+    }
     if ($icon = variable_get('webpush_icon_fid', '')) {
       $file = file_load($icon);
       $uri = $file->uri;
