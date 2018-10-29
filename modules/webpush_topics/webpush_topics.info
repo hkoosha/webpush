@@ -1,0 +1,8 @@
+name = Webpush Topics
+description = "Categorize Webpush notifications with topics."
+core = 7.x
+
+dependencies[] = webpush
+
+;files[] = includes/webpush_subscription.inc
+;files[] = includes/webpush_notification.inc
