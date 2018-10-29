@@ -4,8 +4,6 @@
  *
  * Things left todo:
  *
- * 2) fix states of button (bell)
- *
  * 3) Implement log entity
  *
  * 4) Implement topics on separate module
@@ -30,9 +28,9 @@ function webpush_menu() {
     'type' => MENU_CALLBACK,
   ];
 
-  $items['webpush/subscription'] = [
+  $items['webpush/subscription-registration'] = [
     'type' => MENU_CALLBACK,
-    'page callback' => 'webpush_subscription',
+    'page callback' => 'webpush_subscription_registration_callback',
     'access arguments' => ['register webpush'],
     'access callback' => TRUE,
   ];
@@ -167,7 +165,7 @@ function _webpush_block_build() {
   return $block;
 }
 
-function webpush_subscription() {
+function webpush_subscription_registration_callback() {
   $subscription_input = json_decode(file_get_contents('php://input'), TRUE);
   $subscription = Minishlink\WebPush\Subscription::create([
     'endpoint' => $subscription_input['endpoint'],

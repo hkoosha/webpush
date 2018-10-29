@@ -50,13 +50,6 @@
             Drupal.behaviors.webPush.fn.changePushButtonState('incompatible');
           });
 
-      /**
-       * **************************************************
-       * **************** Helper functions ****************
-       * **************************************************
-       */
-
-
     },
 
     applicationServerKey: ('webpush' in Drupal.settings) ? Drupal.settings.webpush.applicationServerKey : false,
@@ -147,7 +140,7 @@
         const contentEncoding = (PushManager.supportedContentEncodings || ['aesgcm'])[0];
 
         let d = new Date();
-        return fetch('/webpush/subscription?' + d.getTime(), {
+        return fetch('/webpush/subscription-registration?' + d.getTime(), {
           method,
           body: JSON.stringify({
             endpoint: subscription.endpoint,
