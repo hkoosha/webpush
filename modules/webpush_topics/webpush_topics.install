@@ -1,2 +1,23 @@
 <?php
 
+function webpush_topics_install() {
+  $new_vocab = new stdClass();
+  $new_vocab->name = 'Webpush topics';
+  $new_vocab->description = 'Categorization topics for your push notifications.';
+  $new_vocab->machine_name = 'webpush_topics';
+  taxonomy_vocabulary_save($new_vocab);
+
+  $vocab = taxonomy_vocabulary_machine_name_load('webpush_topics');
+  $vid = $vocab->vid;
+  variable_set('webpush_topics_vid', $vid);
+}
+
+/**
+ * Implements hook_uninstall().
+ *
+ * @throws \Exception
+ */
+function webpush_topics_uninstall() {
+  $vocab = taxonomy_vocabulary_machine_name_load('webpush_topics');
+  taxonomy_vocabulary_delete($vocab->vid);
+}
