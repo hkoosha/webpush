@@ -15,7 +15,7 @@ class WebpushSubscriptionController extends EntityAPIController {
 
 }
 
-function _webpush_entity_info() {
+function _webpush_subscription_entity_info() {
   $info = [];
 
   $info['webpush_subscription'] = [
@@ -50,13 +50,19 @@ function _webpush_entity_info() {
   return $info;
 }
 
-function _webpush_entity_property_info() {
+function _webpush_subscription_entity_property_info() {
   $info = [];
 
   $info['webpush_subscription']['properties']['subscription'] = [
     'label' => t('Subscription'),
     'description' => t('The serialized subscription object (\Minishlink\WebPush\Subscription)'),
     'type' => 'text',
+    'schema field' => 'subscription',
+  ];
+  $info['webpush_subscription']['properties']['created'] = [
+    'label' => t('Created'),
+    'description' => t('The serialized subscription object (\Minishlink\WebPush\Subscription)'),
+    'type' => 'date',
     'schema field' => 'subscription',
   ];
 

@@ -168,7 +168,9 @@ function webpush_admin_send_form_submit($form, &$form_state) {
   }
   dsm($values, 'values');
 
-  batch_set(webpush__send_notification_batch($title, $body, $link));
+  $notification_entity = webpush_notification__create_entity($title, $body, $link);
+
+  batch_set(webpush__send_notification_batch($notification_entity));
 }
 
 function webpush_admin_configuration_form() {

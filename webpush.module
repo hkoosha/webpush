@@ -70,6 +70,9 @@ function webpush_menu() {
   // Items related to WebPush Subscription entity.
   $items += _webpush_subscription_menu();
 
+  // Items related to WebPush Notification entity.
+  $items += _webpush_notification_menu();
+
   $items['webpush/autocomplete-node'] = [
     'page callback' => 'webpush_autocomplete_node_callback',
     'type' => MENU_CALLBACK,
@@ -224,6 +227,7 @@ function webpush_delete(Minishlink\WebPush\Subscription $subscription) {
  *
  * @param \Minishlink\WebPush\Subscription $subscription
  *
+ * @return bool
  * @throws \Exception
  */
 function webpush_register__create_entity(Minishlink\WebPush\Subscription $subscription) {
@@ -232,8 +236,23 @@ function webpush_register__create_entity(Minishlink\WebPush\Subscription $subscr
   $entity_type = 'webpush_subscription';
   $entity = entity_create($entity_type, [
     'subscription' => $serialized,
+    'created' => REQUEST_TIME,
   ]);
   $entity->save();
+  return $entity;
+}
+
+function webpush_notification__create_entity($title, $body, $link) {
+  $entity_type = 'webpush_notification';
+  $entity = entity_create($entity_type, [
+    'title' => $title,
+    'body' => $body,
+    'link' => $link,
+    'created' => REQUEST_TIME,
+  ]);
+  $entity->save();
+
+  return $entity;
 }
 
 /**
@@ -289,102 +308,8 @@ function webpush_subscription__get_all() {
 
 }
 
-function webpush__send_notification_batch($title, $body, $link) {
-  drupal_set_message('Sending push notification');
-  $subscriptions = webpush_subscription__get_all();
-  $subscriptions_count = count($subscriptions);
-  $operations = [];
-  foreach ($subscriptions as $subscription_id) {
-    $operations[] = [
-      'webpush__send_notification_batch_wrapper',
-      [
-        'subscription_id' => $subscription_id,
-        'data' => ['title' => $title, 'body' => $body, 'link' => $link],
-      ],
-    ];
-  }
-  $batch = [
-    'operations' => $operations,
-    'finished' => 'webpush__send_notification_batch_finished',
-  ];
-  return $batch;
-}
-
-function webpush__send_notification_batch_finished($success, $results, $operations) {
-  if ($success) {
-    $total = (int) $results['webpush_success'] + (int) $results['webpush_fail'];
-    $success = (int) $results['webpush_success'];
-    $fail = (int) $results['webpush_fail'];
-    $msg = t('Attempted to send @count push notifications. @success have successfully been sent and @fail have failed.', [
-      '@count' => $total,
-      '@success' => $success,
-      '@fail' => $fail,
-    ]);
-    drupal_set_message($msg);
-    $keep_invalid = variable_get('webpush_keep_invalid_subscriptions', FALSE);
-    if (!$keep_invalid) {
-      $invalid = t('The subscriptions of the failed notifications have been deleted.');
-      drupal_set_message($invalid);
-    }
-    else {
-      $invalid = t('The subscriptions of the failed notifications have not been deleted because your configuration indicates to keep them, but you should consider deleting them.');
-      drupal_set_message($invalid, 'warning');
-    }
-  }
-  else {
-    // An error occurred.
-    // $operations contains the operations that remained unprocessed.
-    $error_operation = reset($operations);
-    drupal_set_message(t('An error occurred while processing @operation with arguments : @args', [
-      '@operation' => $error_operation[0],
-      '@args' => print_r($error_operation[0], TRUE),
-    ]));
-  }
-}
-
-/**
- * Initiates the notification sending procedure.
- *
- * @param $subscription_id
- * @param $context
- */
-function webpush__send_notification_batch_wrapper($subscription_id, &$data, &$context) {
-  $title = $data['title'];
-  $body = $data['body'];
-  $link = $data['link'];
-
-  $wrapper = entity_metadata_wrapper('webpush_subscription', $subscription_id);
-
-  /** @var Minishlink\WebPush\Subscription $subscription */
-  $subscription = unserialize($wrapper->subscription->value());
-  $sent = webpush__send_notification($subscription, $title, $body, $link);
-  if ($sent) {
-    if (!isset($context['results']['webpush_success'])) {
-      $context['results']['webpush_success'] = 1;
-    }
-    else {
-      $context['results']['webpush_success']++;
-    }
-  }
-  else {
-    if (!isset($context['results']['webpush_fail'])) {
-      $context['results']['webpush_fail'] = 1;
-    }
-    else {
-      $context['results']['webpush_fail']++;
-    }
-  }
-}
 
 function webpush__send_notification(Minishlink\WebPush\Subscription $subscription, $title, $body, $link) {
-  //  $subscriptions = webpush_subscription__get_all();
-
-  //  foreach ($subscriptions as $subscription_entity) {
-  //    $wrapper = entity_metadata_wrapper('webpush_subscription', $subscription_entity);
-
-  //    /** @var Minishlink\WebPush\Subscription $subscription */
-  //    $subscription = unserialize($wrapper->subscription->value());
-
   $auth = [
     'VAPID' => [
       'subject' => $title,
@@ -433,7 +358,6 @@ function webpush__send_notification(Minishlink\WebPush\Subscription $subscriptio
     watchdog_exception('webpush', $e);
     return FALSE;
   }
-  //  }
 }
 
 function _webpush_send_subscription_failure(array $result, Minishlink\WebPush\Subscription $subscription) {
@@ -453,11 +377,111 @@ function _webpush_send_subscription_failure(array $result, Minishlink\WebPush\Su
 }
 
 /**
+ * Initiates the notification sending procedure.
+ *
+ * @param $subscription_id
+ * @param $context
+ */
+function webpush__send_notification_batch_wrapper($subscription_id, &$data, &$context) {
+  $title = $data['title'];
+  $body = $data['body'];
+  $link = $data['link'];
+
+  $wrapper = entity_metadata_wrapper('webpush_subscription', $subscription_id);
+
+  /** @var Minishlink\WebPush\Subscription $subscription */
+  $subscription = unserialize($wrapper->subscription->value());
+  $sent = webpush__send_notification($subscription, $title, $body, $link);
+  if ($sent) {
+    if (!isset($context['results']['webpush_success'])) {
+      $context['results']['webpush_success'] = 1;
+    }
+    else {
+      $context['results']['webpush_success']++;
+    }
+  }
+  else {
+    if (!isset($context['results']['webpush_fail'])) {
+      $context['results']['webpush_fail'] = 1;
+    }
+    else {
+      $context['results']['webpush_fail']++;
+    }
+  }
+}
+
+
+function webpush__send_notification_batch(WebpushNotification $notification_entity) {
+  $wrapper = entity_metadata_wrapper('webpush_notification', $notification_entity);
+  drupal_set_message('Sending push notification');
+  $subscriptions = webpush_subscription__get_all();
+  $operations = [];
+  foreach ($subscriptions as $subscription_id) {
+    $operations[] = [
+      'webpush__send_notification_batch_wrapper',
+      [
+        'subscription_id' => $subscription_id,
+        'data' => [
+          'title' => $wrapper->title->value(),
+          'body' => $wrapper->body->value(),
+          'link' => $wrapper->link->value(),
+        ],
+      ],
+    ];
+  }
+  $batch = [
+    'operations' => $operations,
+    'finished' => 'webpush__send_notification_batch_finished',
+  ];
+  return $batch;
+}
+
+
+function webpush__send_notification_batch_finished($success, $results, $operations) {
+  if ($success) {
+    $total = (int) $results['webpush_success'] + (int) $results['webpush_fail'];
+    $success = (int) $results['webpush_success'];
+    $fail = (int) $results['webpush_fail'];
+    $msg = t('Attempted to send @count push notifications. @success have successfully been sent and @fail have failed.', [
+      '@count' => $total,
+      '@success' => $success,
+      '@fail' => $fail,
+    ]);
+    drupal_set_message($msg);
+    $keep_invalid = variable_get('webpush_keep_invalid_subscriptions', FALSE);
+    if (!$keep_invalid) {
+      $invalid = t('The subscriptions of the failed notifications have been deleted.');
+      drupal_set_message($invalid);
+    }
+    else {
+      $invalid = t('The subscriptions of the failed notifications have not been deleted because your configuration indicates to keep them, but you should consider deleting them.');
+      drupal_set_message($invalid, 'warning');
+    }
+  }
+  else {
+    // An error occurred.
+    // $operations contains the operations that remained unprocessed.
+    $error_operation = reset($operations);
+    drupal_set_message(t('An error occurred while processing @operation with arguments : @args', [
+      '@operation' => $error_operation[0],
+      '@args' => print_r($error_operation[0], TRUE),
+    ]));
+  }
+}
+
+
+/**
  * Implements hook_entity_info().
  */
 function webpush_entity_info() {
   module_load_include('inc', 'webpush', 'includes/webpush_subscription');
-  return _webpush_entity_info();
+  $_webpush_subscription_entity_info = _webpush_subscription_entity_info();
+
+  module_load_include('inc', 'webpush', 'includes/webpush_notification');
+  $_webpush_notification_entity_info = _webpush_notification_entity_info();
+
+  $info = array_merge($_webpush_subscription_entity_info, $_webpush_notification_entity_info);
+  return $info;
 }
 
 /**
@@ -465,7 +489,14 @@ function webpush_entity_info() {
  */
 function webpush_entity_property_info() {
   module_load_include('inc', 'webpush', 'includes/webpush_subscription');
-  return _webpush_entity_property_info();
+  $_webpush_subscription_entity_property_info = _webpush_subscription_entity_property_info();
+
+  module_load_include('inc', 'webpush', 'includes/webpush_notification');
+  $_webpush_notification_entity_property_info = _webpush_notification_entity_property_info();
+
+
+  $info = array_merge($_webpush_subscription_entity_property_info, $_webpush_notification_entity_property_info);
+  return $info;
 }
 
 /**
@@ -475,9 +506,29 @@ function webpush_subscription_access_callback() {
   return user_access('send push notifications');
 }
 
+/**
+ * Access callback for WebPush Subscription drupal entity.
+ */
+function webpush_notification_access_callback() {
+  return user_access('send push notifications');
+}
+
 function webpush_subscription__count() {
   $query = "SELECT COUNT(id) FROM {webpush_subscription}";
   $total = db_query($query)->fetchField();
   return $total;
 }
 
+///**
+// * Implementation of hook_views_default_views().
+// **/
+//function webpush_views_default_views() {
+//  $files = file_scan_directory(drupal_get_path('module', 'webpush'). '/views', '.views.inc');
+//  foreach ($files as $filepath => $file) {
+//    require $filepath;
+//    if (isset($view)) {
+//      $views[$view->name] = $view;
+//    }
+//  }
+//  return $views;
+//}

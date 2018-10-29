@@ -29,7 +29,7 @@ function webpush_requirements($phase) {
 function webpush_schema() {
 
   $schema['webpush_subscription'] = [
-    'description' => 'The main table that will store your entities data',
+    'description' => 'The main table that will store webpush_subscription entities',
 
     'fields' => [
       'id' => [
@@ -38,11 +38,60 @@ function webpush_schema() {
         'not null' => TRUE,
         'unsigned' => TRUE,
       ],
+      'created' => [
+        'description' => 'The Unix timestamp when the node was most recently created by services.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
       'subscription' => [
         'description' => 'Serialized object of type Minishlink\WebPush\Subscription',
         'type' => 'text',
         'size' => 'normal',
         'not null' => TRUE,
+      ],
+    ],
+
+    'unique keys' => [
+      'id' => ['id'],
+    ],
+
+    'primary key' => ['id'],
+  ];
+
+  $schema['webpush_notification'] = [
+    'description' => 'The main table that will store webpush_notification entities',
+
+    'fields' => [
+      'id' => [
+        'description' => 'Primary key for webpush notifications',
+        'type' => 'serial',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ],
+      'created' => [
+        'description' => 'The Unix timestamp when the node was most recently created by services.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'title' => [
+        //        'description' => 'Serialized object of type Minishlink\WebPush\Subscription',
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+      ],
+      'body' => [
+        //        'description' => 'Serialized object of type Minishlink\WebPush\Subscription',
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+      ],
+      'link' => [
+        //        'description' => 'Serialized object of type Minishlink\WebPush\Subscription',
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => FALSE,
       ],
     ],
 
@@ -63,6 +112,7 @@ function webpush_schema() {
  * At uninstall time we'll notify field.module that the entity was deleted
  * so that attached fields can be cleaned up.
  */
-function webpush_uninstall() {
+function TODO___webpush_uninstall() {
   field_attach_delete_bundle('webpush_subscription', 'webpush_subscription');
+  field_attach_delete_bundle('webpush_notification', 'webpush_notification');
 }
