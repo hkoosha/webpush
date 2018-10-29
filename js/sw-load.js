@@ -203,48 +203,50 @@
           return true;
         }
         return false;
+      },
+
+
+      changePushButtonState: function (state) {
+        const $pushButton = Drupal.behaviors.webPush.pushButton;
+        const $messageSpan = $pushButton.find('span.webpush-subscription-message');
+
+        switch (state) {
+          case 'enabled':
+            $pushButton.disabled = false;
+            $messageSpan.text("Disable Push notifications");
+            Drupal.behaviors.webPush.isPushEnabled = true;
+            $pushButton.addClass('working');
+            break;
+          case 'disabled':
+            $pushButton.disabled = false;
+            $messageSpan.text("Enable Push notifications");
+            Drupal.behaviors.webPush.isPushEnabled = false;
+            $pushButton.addClass('working');
+            break;
+          case 'computing':
+            $pushButton.disabled = true;
+            $messageSpan.text("Loading...");
+            break;
+          case 'incompatible':
+            $pushButton.disabled = true;
+            $messageSpan.text("Push notifications are not compatible with this browser");
+            $pushButton.addClass('not-working');
+            break;
+          case 'userdenied':
+            $pushButton.disabled = true;
+            $messageSpan.text("The user has denied push notifications");
+            $pushButton.addClass('not-working');
+            break;
+          default:
+            console.error('Unhandled push button state', state);
+            $pushButton.addClass('not-working');
+            break;
+        }
       }
 
     },
 
 
-    changePushButtonState: function (state) {
-      const $pushButton = Drupal.behaviors.webPush.pushButton;
-      const $messageSpan = $pushButton.find('span.webpush-subscription-message');
-
-      switch (state) {
-        case 'enabled':
-          $pushButton.disabled = false;
-          $messageSpan.text("Disable Push notifications");
-          Drupal.behaviors.webPush.isPushEnabled = true;
-          $pushButton.addClass('working');
-          break;
-        case 'disabled':
-          $pushButton.disabled = false;
-          $messageSpan.text("Enable Push notifications");
-          Drupal.behaviors.webPush.isPushEnabled = false;
-          $pushButton.addClass('working');
-          break;
-        case 'computing':
-          $pushButton.disabled = true;
-          $messageSpan.text("Loading...");
-          break;
-        case 'incompatible':
-          $pushButton.disabled = true;
-          $messageSpan.text("Push notifications are not compatible with this browser");
-          $pushButton.addClass('not-working');
-          break;
-        case 'userdenied':
-          $pushButton.disabled = true;
-          $messageSpan.text("The user has denied push notifications");
-          $pushButton.addClass('not-working');
-          break;
-        default:
-          console.error('Unhandled push button state', state);
-          $pushButton.addClass('not-working');
-          break;
-      }
-    }
 
 
   };
