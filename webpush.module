@@ -4,11 +4,12 @@
  *
  * Things left todo:
  *
- * 3) Implement log entity
  *
  * 4) Implement topics on separate module
  *
  * 5) Implement user control panel for topics
+ *
+ * 6) Fix: notifications listing page, views fields
  *
  */
 
@@ -67,12 +68,6 @@ function webpush_menu() {
     'page arguments' => ['webpush_admin_configuration_form'],
   ];
 
-  // Items related to WebPush Subscription entity.
-  $items += _webpush_subscription_menu();
-
-  // Items related to WebPush Notification entity.
-  $items += _webpush_notification_menu();
-
   $items['webpush/autocomplete-node'] = [
     'page callback' => 'webpush_autocomplete_node_callback',
     'type' => MENU_CALLBACK,
@@ -80,6 +75,16 @@ function webpush_menu() {
     'access arguments' => ['send push notifications'],
   ];
 
+  // I'm not sure why they are needed, but every time I save a view, I get a
+  // fatal error about the following functions missing...
+  module_load_include('inc', 'webpush', 'includes/webpush_subscription');
+  module_load_include('inc', 'webpush', 'includes/webpush_notification');
+
+  // Items related to WebPush Subscription entity.
+  $items += _webpush_subscription_menu();
+
+  // Items related to WebPush Notification entity.
+  $items += _webpush_notification_menu();
 
   return $items;
 }
@@ -176,7 +181,6 @@ function webpush_subscription_registration_callback() {
     'publicKey' => $subscription_input['publicKey'],
     'contentEncoding' => $subscription_input['contentEncoding'],
   ]);
-
 
   switch ($_SERVER['REQUEST_METHOD']) {
     case 'POST':
@@ -494,7 +498,6 @@ function webpush_entity_property_info() {
   module_load_include('inc', 'webpush', 'includes/webpush_notification');
   $_webpush_notification_entity_property_info = _webpush_notification_entity_property_info();
 
-
   $info = array_merge($_webpush_subscription_entity_property_info, $_webpush_notification_entity_property_info);
   return $info;
 }
@@ -519,16 +522,20 @@ function webpush_subscription__count() {
   return $total;
 }
 
-///**
-// * Implementation of hook_views_default_views().
-// **/
-//function webpush_views_default_views() {
-//  $files = file_scan_directory(drupal_get_path('module', 'webpush'). '/views', '.views.inc');
-//  foreach ($files as $filepath => $file) {
-//    require $filepath;
-//    if (isset($view)) {
-//      $views[$view->name] = $view;
-//    }
-//  }
-//  return $views;
-//}
+/**
+ * Implementation of hook_views_default_views().
+ *
+ * @TODO this does not work
+ *
+ **/
+function webpush_views_default_views() {
+  $files = file_scan_directory(drupal_get_path('module', 'webpush') . '/views', '.views.inc');
+  foreach ($files as $filepath => $file) {
+    require $filepath;
+    if (isset($view)) {
+      $views[$view->name] = $view;
+    }
+  }
+  return $views;
+}
+
