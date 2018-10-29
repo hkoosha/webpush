@@ -63,12 +63,12 @@
         navigator.serviceWorker.ready
             .then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.subscribe({
               userVisibleOnly: true,
-              applicationServerKey: urlBase64ToUint8Array(Drupal.behaviors.webPush.applicationServerKey),
+              applicationServerKey: Drupal.behaviors.webPush.fn.urlBase64ToUint8Array(Drupal.behaviors.webPush.applicationServerKey),
             }))
             .then(subscription => {
               // Subscription was successful
               // create subscription on your server
-              return push_sendSubscriptionToServer(subscription, 'POST');
+              return Drupal.behaviors.webPush.fn.push_sendSubscriptionToServer(subscription, 'POST');
             })
             .then(subscription => subscription && Drupal.behaviors.webPush.fn.changePushButtonState('enabled')) // update your UI
             .catch(e => {
@@ -107,7 +107,7 @@
 
               // We have a subscription, unsubscribe
               // Remove push subscription from server
-              return push_sendSubscriptionToServer(subscription, 'DELETE');
+              return Drupal.behaviors.webPush.fn.push_sendSubscriptionToServer(subscription, 'DELETE');
             })
             .then(subscription => subscription.unsubscribe())
             .then(() => Drupal.behaviors.webPush.fn.changePushButtonState('disabled'))
@@ -122,23 +122,6 @@
       }
 
 
-      function push_sendSubscriptionToServer(subscription, method) {
-        const key = subscription.getKey('p256dh');
-        const token = subscription.getKey('auth');
-        const contentEncoding = (PushManager.supportedContentEncodings || ['aesgcm'])[0];
-
-        let d = new Date();
-        return fetch('/webpush/subscription?' + d.getTime(), {
-          method,
-          body: JSON.stringify({
-            endpoint: subscription.endpoint,
-            publicKey: key ? btoa(String.fromCharCode.apply(null, new Uint8Array(key))) : null,
-            authToken: token ? btoa(String.fromCharCode.apply(null, new Uint8Array(token))) : null,
-            contentEncoding,
-          }),
-        }).then(() => subscription);
-      }
-
       function push_updateSubscription() {
         navigator.serviceWorker.ready.then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.getSubscription())
             .then(subscription => {
@@ -151,7 +134,7 @@
               }
 
               // Keep your server in sync with the latest endpoint
-              return push_sendSubscriptionToServer(subscription, 'PUT');
+              return Drupal.behaviors.webPush.fn.push_sendSubscriptionToServer(subscription, 'PUT');
             })
             .then(subscription => subscription && Drupal.behaviors.webPush.fn.changePushButtonState('enabled')) // Set your UI to show they have subscribed for push messages
             .catch(e => {
@@ -159,20 +142,6 @@
             });
       }
 
-      function urlBase64ToUint8Array(base64String) {
-        const padding = '='.repeat((4 - base64String.length % 4) % 4);
-        const base64 = (base64String + padding)
-            .replace(/\-/g, '+')
-            .replace(/_/g, '/');
-
-        const rawData = window.atob(base64);
-        const outputArray = new Uint8Array(rawData.length);
-
-        for (let i = 0; i < rawData.length; ++i) {
-          outputArray[i] = rawData.charCodeAt(i);
-        }
-        return outputArray;
-      }
 
     },
 
@@ -204,7 +173,6 @@
         }
         return false;
       },
-
 
       changePushButtonState: function (state) {
         const $pushButton = Drupal.behaviors.webPush.pushButton;
@@ -242,11 +210,42 @@
             $pushButton.addClass('not-working');
             break;
         }
-      }
+      },
+
+      urlBase64ToUint8Array: function (base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/\-/g, '+')
+            .replace(/_/g, '/');
+
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+
+        for (let i = 0; i < rawData.length; ++i) {
+          outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+      },
+
+      push_sendSubscriptionToServer: function (subscription, method) {
+        const key = subscription.getKey('p256dh');
+        const token = subscription.getKey('auth');
+        const contentEncoding = (PushManager.supportedContentEncodings || ['aesgcm'])[0];
+
+        let d = new Date();
+        return fetch('/webpush/subscription?' + d.getTime(), {
+          method,
+          body: JSON.stringify({
+            endpoint: subscription.endpoint,
+            publicKey: key ? btoa(String.fromCharCode.apply(null, new Uint8Array(key))) : null,
+            authToken: token ? btoa(String.fromCharCode.apply(null, new Uint8Array(token))) : null,
+            contentEncoding,
+          }),
+        }).then(() => subscription);
+      },
+
 
     },
-
-
 
 
   };
