@@ -1,22 +1,33 @@
 #webpush-subscription-button {
-  background-color: yellow;
   background-repeat: no-repeat;
   background-position: center center;
-  color: red;
-  font-size: 28px;
   padding: 50px;
   position: fixed;
   left: 20px;
-  bottom: 50px;
+  bottom: 20px;
   z-index: 999;
 }
 
-#webpush-subscription-button.enabled {
+#webpush-subscription-button.working {
   background-image: url('../images/bell-black.png');
   cursor: pointer;
 }
 
-#webpush-subscription-button.disabled {
+#webpush-subscription-button.not-working {
   background-image: url('../images/bell-grey.png');
   cursor: not-allowed;
+}
+
+.webpush-subscription-message {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  display: none;
+  font-size: 12px;
+  line-height: 14px;
+  width: 240px;
+}
+
+#webpush-subscription-button:hover .webpush-subscription-message {
+  display: block;
 }

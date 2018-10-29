@@ -4,8 +4,6 @@
  *
  * Things left todo:
  *
- * 1) batch
- *
  * 2) fix states of button (bell)
  *
  * 3) Implement log entity
@@ -14,7 +12,6 @@
  *
  * 5) Implement user control panel for topics
  *
- * 6) queue
  */
 
 
@@ -156,35 +153,10 @@ function webpush_block_view($delta = '') {
 }
 
 function _webpush_block_build() {
-
-  // Capture the image file path and form into HTML with attributes
-  //  $image_file = file_load(variable_get('block_image_fid', ''));
-  //  $image_path = '';
-
-  //  if (isset($image_file->uri)) {
-  //    $image_path = $image_file->uri;
-  //  }
-
-  //  $image = theme_image([
-  //    'path' => ($image_path),
-  //    'alt' => t('Image description here.'),
-  //    'title' => t('This is our block image.'),
-  //    'attributes' => ['class' => 'class_name'],
-  //  ]);
-
-  // Capture WYSIWYG text from the variable
-  //  $text = variable_get('text_variable', '');
-
-  // Block output in HTML with div wrapper
   $block = [
-    //    'image' => [
-    //      '#prefix' => '',
-    //      '#type' => 'markup',
-    //      '#markup' => $image,
-    //    ],
     'message' => [
       '#type' => 'markup',
-      '#markup' => '<div id="webpush-subscription-button">HERE</div>',
+      '#markup' => '<div id="webpush-subscription-button"><span class="webpush-subscription-message"></span></div>',
       '#suffix' => '',
     ],
   ];

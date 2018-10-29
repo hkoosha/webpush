@@ -142,36 +142,38 @@
       }
 
       function changePushButtonState(state, $pushButton) {
+        const $messageSpan = $pushButton.find('span.webpush-subscription-message');
+
         switch (state) {
           case 'enabled':
             $pushButton.disabled = false;
-            $pushButton.text("Disable Push notifications");
+            $messageSpan.text("Disable Push notifications");
             isPushEnabled = true;
-            $pushButton.addClass('enabled');
+            $pushButton.addClass('working');
             break;
           case 'disabled':
             $pushButton.disabled = false;
-            $pushButton.text("Enable Push notifications");
+            $messageSpan.text("Enable Push notifications");
             isPushEnabled = false;
-            $pushButton.addClass('disabled');
+            $pushButton.addClass('working');
             break;
           case 'computing':
             $pushButton.disabled = true;
-            $pushButton.text("Loading...");
+            $messageSpan.text("Loading...");
             break;
           case 'incompatible':
             $pushButton.disabled = true;
-            $pushButton.text("Push notifications are not compatible with this browser");
-            $pushButton.addClass('disabled');
+            $messageSpan.text("Push notifications are not compatible with this browser");
+            $pushButton.addClass('not-working');
             break;
           case 'userdenied':
             $pushButton.disabled = true;
-            $pushButton.text("The user has denied push notifications");
-            $pushButton.addClass('disabled');
+            $messageSpan.text("The user has denied push notifications");
+            $pushButton.addClass('not-working');
             break;
           default:
             console.error('Unhandled push button state', state);
-            $pushButton.addClass('disabled');
+            $pushButton.addClass('not-working');
             break;
         }
       }
