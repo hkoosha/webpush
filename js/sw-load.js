@@ -44,7 +44,7 @@
       navigator.serviceWorker.register("webpush/serviceworker/js", {scope: '/'})
           .then(() => {
             console.log('[SW] Service worker has been registered');
-            push_updateSubscription();
+            Drupal.behaviors.webPush.fn.push_updateSubscription();
           }, e => {
             console.error('[SW] Service worker registration failed', e);
             Drupal.behaviors.webPush.fn.changePushButtonState('incompatible');
@@ -118,27 +118,6 @@
               // inform the user that you have done so
               console.error('Error when unsubscribing the user', e);
               Drupal.behaviors.webPush.fn.changePushButtonState('disabled', $pushButton);
-            });
-      }
-
-
-      function push_updateSubscription() {
-        navigator.serviceWorker.ready.then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.getSubscription())
-            .then(subscription => {
-              Drupal.behaviors.webPush.fn.changePushButtonState('disabled');
-
-              if (!subscription) {
-                // We aren't subscribed to push, so set UI to allow the user to
-                // enable push
-                return;
-              }
-
-              // Keep your server in sync with the latest endpoint
-              return Drupal.behaviors.webPush.fn.push_sendSubscriptionToServer(subscription, 'PUT');
-            })
-            .then(subscription => subscription && Drupal.behaviors.webPush.fn.changePushButtonState('enabled')) // Set your UI to show they have subscribed for push messages
-            .catch(e => {
-              console.error('Error when updating the subscription', e);
             });
       }
 
@@ -243,6 +222,26 @@
           }),
         }).then(() => subscription);
       },
+
+      push_updateSubscription: function () {
+        navigator.serviceWorker.ready.then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.getSubscription())
+            .then(subscription => {
+              Drupal.behaviors.webPush.fn.changePushButtonState('disabled');
+
+              if (!subscription) {
+                // We aren't subscribed to push, so set UI to allow the user to
+                // enable push
+                return;
+              }
+
+              // Keep your server in sync with the latest endpoint
+              return Drupal.behaviors.webPush.fn.push_sendSubscriptionToServer(subscription, 'PUT');
+            })
+            .then(subscription => subscription && Drupal.behaviors.webPush.fn.changePushButtonState('enabled')) // Set your UI to show they have subscribed for push messages
+            .catch(e => {
+              console.error('Error when updating the subscription', e);
+            });
+      }
 
 
     },
