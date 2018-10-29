@@ -2,28 +2,28 @@
   Drupal.behaviors.webPush = {
     attach: function (context, settings) {
 
-      const applicationServerKey = ('webpush' in Drupal.settings) ? Drupal.settings.webpush.applicationServerKey : false;
-      if (!applicationServerKey) {
+      this.applicationServerKey = ('webpush' in Drupal.settings) ? Drupal.settings.webpush.applicationServerKey : false;
+      if (!this.applicationServerKey) {
         return;
       }
 
-      let isPushEnabled = false;
+      this.isPushEnabled = false;
 
       // If there is no subscription related button, nothing to do here.
-      const $pushButton = $('#webpush-subscription-button');
-      if (!$pushButton) {
+      this.pushButton = $('#webpush-subscription-button');
+      if (!this.pushButton) {
         return;
       }
 
       // If the features are not supported by the browser, stop here.
-      if (unsupportedFeatures()) {
+      if (this.unsupportedFeatures()) {
         return;
       }
 
       // Subscription button
-      $pushButton.once('webpush-subscription-click', function () {
+      this.pushButton.once('webpush-subscription-click', function () {
         $(this).click(function () {
-          if (isPushEnabled) {
+          if (Drupal.behaviors.webPush.isPushEnabled) {
             push_unsubscribe();
           }
           else {
@@ -37,7 +37,7 @@
       // changes the permission manually
       if (Notification.permission === 'denied') {
         console.warn('Notifications are denied by the user');
-        changePushButtonState('userdenied', $pushButton);
+        changePushButtonState('userdenied');
         return;
       }
 
@@ -47,7 +47,7 @@
             push_updateSubscription();
           }, e => {
             console.error('[SW] Service worker registration failed', e);
-            changePushButtonState('incompatible', $pushButton);
+            changePushButtonState('incompatible');
           });
 
       /**
@@ -56,41 +56,21 @@
        * **************************************************
        */
 
-      function unsupportedFeatures() {
-        if (!('serviceWorker' in navigator)) {
-          console.warn("Service workers are not supported by this browser");
-          changePushButtonState('incompatible', $pushButton);
-          return true;
-        }
-
-        if (!('PushManager' in window)) {
-          console.warn('Push notifications are not supported by this browser');
-          changePushButtonState('incompatible', $pushButton);
-          return true;
-        }
-
-        if (!('showNotification' in ServiceWorkerRegistration.prototype)) {
-          console.warn('Notifications are not supported by this browser');
-          changePushButtonState('incompatible', $pushButton);
-          return true;
-        }
-        return false;
-      }
 
       function push_subscribe() {
-        changePushButtonState('computing', $pushButton);
+        changePushButtonState('computing');
 
         navigator.serviceWorker.ready
             .then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.subscribe({
               userVisibleOnly: true,
-              applicationServerKey: urlBase64ToUint8Array(applicationServerKey),
+              applicationServerKey: urlBase64ToUint8Array(Drupal.behaviors.webPush.applicationServerKey),
             }))
             .then(subscription => {
               // Subscription was successful
               // create subscription on your server
               return push_sendSubscriptionToServer(subscription, 'POST');
             })
-            .then(subscription => subscription && changePushButtonState('enabled', $pushButton)) // update your UI
+            .then(subscription => subscription && changePushButtonState('enabled')) // update your UI
             .catch(e => {
               if (Notification.permission === 'denied') {
                 // The user denied the notification permission which
@@ -98,19 +78,19 @@
                 // to manually change the notification permission to
                 // subscribe to push messages
                 console.warn('Notifications are denied by the user.');
-                changePushButtonState('userdenied', $pushButton);
+                changePushButtonState('userdenied');
               }
               else {
                 // A problem occurred with the subscription; common reasons
                 // include network errors or the user skipped the permission
                 console.error('Impossible to subscribe to push notifications', e);
-                changePushButtonState('disabled', $pushButton);
+                changePushButtonState('disabled');
               }
             });
       }
 
       function push_unsubscribe() {
-        changePushButtonState('computing', $pushButton);
+        changePushButtonState('computing');
 
         // To unsubscribe from push messaging, you need to get the subscription
         // object
@@ -121,7 +101,7 @@
               if (!subscription) {
                 // No subscription object, so set the state
                 // to allow the user to subscribe to push
-                changePushButtonState('disabled', $pushButton);
+                changePushButtonState('disabled');
                 return;
               }
 
@@ -130,7 +110,7 @@
               return push_sendSubscriptionToServer(subscription, 'DELETE');
             })
             .then(subscription => subscription.unsubscribe())
-            .then(() => changePushButtonState('disabled', $pushButton))
+            .then(() => changePushButtonState('disabled'))
             .catch(e => {
               // We failed to unsubscribe, this can lead to
               // an unusual state, so  it may be best to remove
@@ -141,20 +121,21 @@
             });
       }
 
-      function changePushButtonState(state, $pushButton) {
+      function changePushButtonState(state) {
+        const $pushButton = Drupal.behaviors.webPush.pushButton;
         const $messageSpan = $pushButton.find('span.webpush-subscription-message');
 
         switch (state) {
           case 'enabled':
             $pushButton.disabled = false;
             $messageSpan.text("Disable Push notifications");
-            isPushEnabled = true;
+            Drupal.behaviors.webPush.isPushEnabled = true;
             $pushButton.addClass('working');
             break;
           case 'disabled':
             $pushButton.disabled = false;
             $messageSpan.text("Enable Push notifications");
-            isPushEnabled = false;
+            Drupal.behaviors.webPush.isPushEnabled = false;
             $pushButton.addClass('working');
             break;
           case 'computing':
@@ -198,7 +179,7 @@
       function push_updateSubscription() {
         navigator.serviceWorker.ready.then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.getSubscription())
             .then(subscription => {
-              changePushButtonState('disabled', $pushButton);
+              changePushButtonState('disabled');
 
               if (!subscription) {
                 // We aren't subscribed to push, so set UI to allow the user to
@@ -209,7 +190,7 @@
               // Keep your server in sync with the latest endpoint
               return push_sendSubscriptionToServer(subscription, 'PUT');
             })
-            .then(subscription => subscription && changePushButtonState('enabled', $pushButton)) // Set your UI to show they have subscribed for push messages
+            .then(subscription => subscription && changePushButtonState('enabled')) // Set your UI to show they have subscribed for push messages
             .catch(e => {
               console.error('Error when updating the subscription', e);
             });
@@ -230,6 +211,35 @@
         return outputArray;
       }
 
+    },
+
+    applicationServerKey: ('webpush' in Drupal.settings) ? Drupal.settings.webpush.applicationServerKey : false,
+
+    isPushEnabled: false,
+
+    pushButton: $('#webpush-subscription-button'),
+
+    unsupportedFeatures: function () {
+    if (!('serviceWorker' in navigator)) {
+      console.warn("Service workers are not supported by this browser");
+      this.changePushButtonState('incompatible');
+      return true;
     }
-  };
+
+    if (!('PushManager' in window)) {
+      console.warn('Push notifications are not supported by this browser');
+      this.changePushButtonState('incompatible');
+      return true;
+    }
+
+    if (!('showNotification' in ServiceWorkerRegistration.prototype)) {
+      console.warn('Notifications are not supported by this browser');
+      this.changePushButtonState('incompatible');
+      return true;
+    }
+    return false;
+  }
+
+
+};
 })(jQuery, Drupal);
