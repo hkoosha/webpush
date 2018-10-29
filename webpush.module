@@ -5,11 +5,13 @@
  * Things left todo:
  *
  *
- * 4) Implement topics on separate module
+ * - Implement topics on separate module
  *
- * 5) Implement user control panel for topics
+ * - Implement user control panel for topics
  *
- * 6) Fix: notifications listing page, views fields
+ * - Fix: notifications listing page, default view does not work
+ *
+ * - Notification entity: store total and successfull deliveries
  *
  */
 
@@ -75,16 +77,36 @@ function webpush_menu() {
     'access arguments' => ['send push notifications'],
   ];
 
-  // I'm not sure why they are needed, but every time I save a view, I get a
-  // fatal error about the following functions missing...
-  module_load_include('inc', 'webpush', 'includes/webpush_subscription');
-  module_load_include('inc', 'webpush', 'includes/webpush_notification');
 
   // Items related to WebPush Subscription entity.
-  $items += _webpush_subscription_menu();
+  $items['admin/structure/webpush-subscription/manage'] = [
+    'title' => 'WebPush subscriptions',
+    'page callback' => 'webpush_subscription__overview',
+    'file' => 'includes/webpush_subscription.inc',
+    'access arguments' => ['administer webpush'],
+  ];
+
+  $items['admin/structure/webpush-subscription/manage/list'] = [
+    'title' => 'Overview',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'access arguments' => ['send push notifications'],
+  ];
+
 
   // Items related to WebPush Notification entity.
-  $items += _webpush_notification_menu();
+  $items['admin/structure/webpush-notification/manage'] = [
+    'title' => 'WebPush notifiations',
+    'page callback' => 'webpush_notification__overview',
+    'file' => 'includes/webpush_notification.inc',
+    'access arguments' => ['administer webpush'],
+  ];
+
+  $items['admin/structure/webpush-notification/manage/list'] = [
+    'title' => 'Overview',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'access arguments' => ['send push notifications'],
+  ];
+
 
   return $items;
 }

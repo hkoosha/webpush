@@ -69,25 +69,6 @@ function _webpush_subscription_entity_property_info() {
   return $info;
 }
 
-function _webpush_subscription_menu() {
-  $items = [];
-
-  $items['admin/structure/webpush-subscription/manage'] = [
-    'title' => 'WebPush subscriptions',
-    'page callback' => 'webpush_subscription__overview',
-    'file' => 'includes/webpush_subscription.inc',
-    'access arguments' => ['administer webpush'],
-  ];
-
-  $items['admin/structure/webpush-subscription/manage/list'] = [
-    'title' => 'Overview',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'access arguments' => ['send push notifications'],
-  ];
-
-  return $items;
-}
-
 function webpush_subscription__overview() {
   $count = webpush_subscription__count();
   $content[] = [

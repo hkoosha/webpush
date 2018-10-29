@@ -88,26 +88,6 @@ function _webpush_notification_entity_property_info() {
   return $info;
 }
 
-function _webpush_notification_menu() {
-  $items = [];
-
-  $items['admin/structure/webpush-notification/manage'] = [
-    'title' => 'WebPush notifiations',
-    'page callback' => 'webpush_notification__overview',
-    'file' => 'includes/webpush_notification.inc',
-    'access arguments' => ['administer webpush'],
-  ];
-
-  $items['admin/structure/webpush-notification/manage/list'] = [
-    'title' => 'Overview',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'access arguments' => ['send push notifications'],
-  ];
-
-  return $items;
-
-}
-
 function webpush_notification__overview() {
   $content[] = [
     '#markup' => views_embed_view('webpush_notifications', 'default'),
