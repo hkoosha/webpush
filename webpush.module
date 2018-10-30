@@ -190,7 +190,7 @@ function _webpush_block_build() {
   ];
 
   // Add some css.
-  drupal_add_css(drupal_get_path('module', 'webpush') . '/css/webpush_bell.css');
+  drupal_add_css(drupal_get_path('module', 'webpush') . '/css/webpush_toggle_icon.css');
 
   return $block;
 }
