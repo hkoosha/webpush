@@ -144,9 +144,8 @@ function webpush_preprocess_html(&$variables) {
     return;
   }
 
-  // Load the helper scripts.
+  // Load the app script.
   drupal_add_js(drupal_get_path('module', 'webpush') . '/js/app.js', 'file');
-  drupal_add_js(drupal_get_path('module', 'webpush') . '/js/simple-button.js', 'file');
   // Load the service worker.
   drupal_add_js(['webpush' => ['path' => url('/webpush/serviceworker/js')]], 'setting');
   // Send the public key to js.
@@ -188,10 +187,15 @@ function _webpush_block_build() {
       '#markup' => '<div id="webpush-subscription-button"><span id="webpush-subscription-message"></span></div>',
       '#suffix' => '',
     ],
+    '#attached' => [
+      'css' => [
+        drupal_get_path('module', 'webpush') . '/css/simple_button.css',
+      ],
+      'js' => [
+        drupal_get_path('module', 'webpush') . '/js/simple_button.js',
+      ],
+    ],
   ];
-
-  // Add some css.
-  drupal_add_css(drupal_get_path('module', 'webpush') . '/css/webpush_toggle_icon.css');
 
   return $block;
 }
