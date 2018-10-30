@@ -2,10 +2,13 @@
   Drupal.behaviors.webPushApp = {
 
     attach: function (context, settings) {
+
+      // Initialize the application server key
       if (!this.initializeApplicationServerKey()) {
         return;
       }
 
+      // Initialize variable.
       this.isPushEnabled = false;
 
       // If the features are not supported by the browser, stop here.
@@ -14,6 +17,25 @@
       }
 
 
+      // Check the current Notification permission.
+      // If its denied, the button should appears as such, until the user
+      // changes the permission manually
+      if (Notification.permission === 'denied') {
+        console.warn('Notifications are denied by the user');
+        this.updateWebpushState('userdenied');
+        return;
+      }
+
+      // Register the service worker.
+      const that = this;
+      navigator.serviceWorker.register("webpush/serviceworker/js", {scope: '/'})
+          .then(() => {
+            console.log('[SW] Service worker has been registered');
+            that.push_updateSubscription();
+          }, e => {
+            console.error('[SW] Service worker registration failed', e);
+            that.updateWebpushState('incompatible');
+          });
     },
 
     isPushEnabled: false,
