@@ -2,26 +2,14 @@
   Drupal.behaviors.webPushSimpleButton = {
     attach: function (context, settings) {
 
-      // Initialize button
-      let initializeSimpleButton = this.initializeSimpleButton();
-      if (!initializeSimpleButton) {
-        return;
+      const buttonID = Drupal.settings.webpush.simple_button_id;
+      const $button = $('#' + buttonID);
 
-        // @TODO do something here
-      }
+      // Assign it to the app property.
+      Drupal.behaviors.webPushApp.subButton = $button;
 
-    },
-
-    app: Drupal.behaviors.webPushApp,
-
-    initializeSimpleButton: function () {
-      // If there is no subscription related button, nothing to do here.
-      Drupal.behaviors.webPushApp.subButton = $('#webpush-subscription-button');
-      if (!Drupal.behaviors.webPushApp.subButton) {
-        return false;
-      }
-
-      Drupal.behaviors.webPushApp.subButton.once('webpush-subscription-click', function () {
+      // Handle the click event.
+      $button.once('webpush-subscription-click', function () {
         $(this).click(function () {
           const $button = $(this);
           if (Drupal.behaviors.webPushApp.isPushEnabled) {
@@ -35,6 +23,8 @@
 
       return true;
     },
+
+    app: Drupal.behaviors.webPushApp,
 
   };
 })(jQuery, Drupal);

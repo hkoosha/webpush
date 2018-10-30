@@ -158,8 +158,8 @@ function webpush_preprocess_html(&$variables) {
  */
 function webpush_block_info() {
   $blocks = [];
-  $blocks['webpush_toggle_icon'] = [
-    'info' => t('Webpush toggle icon'),
+  $blocks['simple_button'] = [
+    'info' => t('Webpush simple button'),
   ];
 
   return $blocks;
@@ -172,7 +172,7 @@ function webpush_block_view($delta = '') {
   $block = [];
 
   switch ($delta) {
-    case 'webpush_toggle_icon' :
+    case 'simple_button' :
       $block['content'] = _webpush_block_build();
       break;
   }
@@ -184,19 +184,28 @@ function _webpush_block_build() {
   $block = [
     'message' => [
       '#type' => 'markup',
-      '#markup' => '<div id="webpush-subscription-button"><span id="webpush-subscription-message"></span></div>',
+      '#markup' => '<div id="webpush-simple-sub-button"><span id="webpush-subscription-message"></span></div>',
       '#suffix' => '',
     ],
+
     '#attached' => [
       'css' => [
         drupal_get_path('module', 'webpush') . '/css/simple_button.css',
       ],
+
       'js' => [
-        drupal_get_path('module', 'webpush') . '/js/simple_button.js',
+        [
+          'type' => 'setting',
+          'data' => ['webpush' => ['simple_button_id' => 'webpush-simple-sub-button']],
+        ],
+        [
+          'data' => drupal_get_path('module', 'webpush') . '/js/simple_button.js',
+          'type' => 'file',
+        ],
       ],
     ],
-  ];
 
+  ];
   return $block;
 }
 

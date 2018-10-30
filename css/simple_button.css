@@ -1,4 +1,4 @@
-#webpush-subscription-button {
+#webpush-simple-sub-button {
   background-repeat: no-repeat;
   background-position: center center;
   padding: 50px;
@@ -8,12 +8,12 @@
   z-index: 999;
 }
 
-#webpush-subscription-button.working {
+#webpush-simple-sub-button.working {
   background-image: url('../images/bell-black.png');
   cursor: pointer;
 }
 
-#webpush-subscription-button.not-working {
+#webpush-simple-sub-button.not-working {
   background-image: url('../images/bell-grey.png');
   cursor: not-allowed;
 }
@@ -28,6 +28,6 @@
   width: 240px;
 }
 
-#webpush-subscription-button:hover #webpush-subscription-message {
+#webpush-simple-sub-button:hover #webpush-subscription-message {
   display: block;
 }
