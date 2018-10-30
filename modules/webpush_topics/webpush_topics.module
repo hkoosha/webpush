@@ -20,10 +20,27 @@ function webpush_topics_block_view($delta = '') {
 
   switch ($delta) {
     case 'webpush_user_panel' :
-      $block['content'] = theme('webpush_topics_user_panel', _webpush_topics_block_variables());
 
-      // Add some css.
-      drupal_add_css(drupal_get_path('module', 'webpush_topics') . '/css/webpush_user_panel.css');
+      $block['content'] = [
+        'message' => ['#markup' => theme('webpush_topics_user_panel', _webpush_topics_block_variables())],
+
+        '#attached' => [
+          'css' => [
+            drupal_get_path('module', 'webpush_topics') . '/css/user_panel.css',
+          ],
+//          'js' => [
+//            [
+//              'type' => 'setting',
+//              'data' => ['webpush' => ['simple_button_id' => 'webpush-simple-sub-button']],
+//            ],
+//            [
+//              'data' => drupal_get_path('module', 'webpush') . '/js/simple_button.js',
+//              'type' => 'file',
+//            ],
+//          ],
+        ],
+
+      ];
 
       break;
   }
