@@ -81,44 +81,6 @@
         return false;
       },
 
-      changePushButtonState: function (state) {
-        const $pushButton = Drupal.behaviors.webPush.pushButton;
-        const $messageSpan = $pushButton.find('span.webpush-subscription-message');
-
-        switch (state) {
-          case 'enabled':
-            $pushButton.disabled = false;
-            $messageSpan.text("Disable Push notifications");
-            Drupal.behaviors.webPush.isPushEnabled = true;
-            $pushButton.addClass('working');
-            break;
-          case 'disabled':
-            $pushButton.disabled = false;
-            $messageSpan.text("Enable Push notifications");
-            Drupal.behaviors.webPush.isPushEnabled = false;
-            $pushButton.addClass('working');
-            break;
-          case 'computing':
-            $pushButton.disabled = true;
-            $messageSpan.text("Loading...");
-            break;
-          case 'incompatible':
-            $pushButton.disabled = true;
-            $messageSpan.text("Push notifications are not compatible with this browser");
-            $pushButton.addClass('not-working');
-            break;
-          case 'userdenied':
-            $pushButton.disabled = true;
-            $messageSpan.text("The user has denied push notifications");
-            $pushButton.addClass('not-working');
-            break;
-          default:
-            console.error('Unhandled push button state', state);
-            $pushButton.addClass('not-working');
-            break;
-        }
-      },
-
       urlBase64ToUint8Array: function (base64String) {
         const padding = '='.repeat((4 - base64String.length % 4) % 4);
         const base64 = (base64String + padding)
@@ -150,6 +112,8 @@
           }),
         }).then(() => subscription);
       },
+
+
 
       push_updateSubscription: function () {
         navigator.serviceWorker.ready.then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.getSubscription())
@@ -233,6 +197,46 @@
               console.error('Error when unsubscribing the user', e);
               Drupal.behaviors.webPush.fn.changePushButtonState('disabled', $pushButton);
             });
+      },
+
+
+
+      changePushButtonState: function (state) {
+        const $pushButton = Drupal.behaviors.webPush.pushButton;
+        const $messageSpan = $pushButton.find('span.webpush-subscription-message');
+
+        switch (state) {
+          case 'enabled':
+            $pushButton.disabled = false;
+            $messageSpan.text("Disable Push notifications");
+            Drupal.behaviors.webPush.isPushEnabled = true;
+            $pushButton.addClass('working');
+            break;
+          case 'disabled':
+            $pushButton.disabled = false;
+            $messageSpan.text("Enable Push notifications");
+            Drupal.behaviors.webPush.isPushEnabled = false;
+            $pushButton.addClass('working');
+            break;
+          case 'computing':
+            $pushButton.disabled = true;
+            $messageSpan.text("Loading...");
+            break;
+          case 'incompatible':
+            $pushButton.disabled = true;
+            $messageSpan.text("Push notifications are not compatible with this browser");
+            $pushButton.addClass('not-working');
+            break;
+          case 'userdenied':
+            $pushButton.disabled = true;
+            $messageSpan.text("The user has denied push notifications");
+            $pushButton.addClass('not-working');
+            break;
+          default:
+            console.error('Unhandled push button state', state);
+            $pushButton.addClass('not-working');
+            break;
+        }
       },
 
     },
