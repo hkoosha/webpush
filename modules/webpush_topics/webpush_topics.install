@@ -1,15 +1,11 @@
 <?php
 
 function webpush_topics_install() {
-  $new_vocab = new stdClass();
-  $new_vocab->name = 'Webpush topics';
-  $new_vocab->description = 'Categorization topics for your push notifications.';
-  $new_vocab->machine_name = 'webpush_topics';
-  taxonomy_vocabulary_save($new_vocab);
+  // Create taxonomy vocabulary
+  _webpush_topics_create_taxonomy_vocabulary();
 
-  $vocab = taxonomy_vocabulary_machine_name_load('webpush_topics');
-  $vid = $vocab->vid;
-  variable_set('webpush_topics_vid', $vid);
+  // Create reference fields
+  _webpush_topics_create_fields();
 }
 
 /**
@@ -18,6 +14,77 @@ function webpush_topics_install() {
  * @throws \Exception
  */
 function webpush_topics_uninstall() {
+  // Delete taxonomy vocabulary
+  _webpush_topics_delete_taxonomy_vocabulary();
+
+  // Delete reference fields
+  _webpush_topics_delete_fields();
+}
+
+function _webpush_topics_create_taxonomy_vocabulary() {
+  $new_vocab = new stdClass();
+  $new_vocab->name = 'Webpush topics';
+  $new_vocab->description = 'Categorization topics for your push notifications.';
+  $new_vocab->machine_name = 'webpush_topics';
+  taxonomy_vocabulary_save($new_vocab);
+
+  // @TODO dedup. Keep this for now.
+  //  $vocab = taxonomy_vocabulary_machine_name_load('webpush_topics');
+  //  $vid = $vocab->vid;
+  //  variable_set('webpush_topics_vid', $vid);
+}
+
+/**
+ * @throws \Exception
+ */
+function _webpush_topics_delete_taxonomy_vocabulary() {
   $vocab = taxonomy_vocabulary_machine_name_load('webpush_topics');
   taxonomy_vocabulary_delete($vocab->vid);
+}
+
+function _webpush_topics_create_fields() {
+  $field = [
+    'field_name' => 'webpush_topics',
+    'type' => 'entityreference',
+    'entity_types' => [
+      'webpush_notification',
+      'webpush_subscription',
+    ],
+    'settings' => [
+      'target_type' => 'taxonomy_term',
+      'handler_settings' => ['target_bundles' => ['webpush_topics']], // @TODO this will change if dedupe
+    ],
+    'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+    'locked' => TRUE,
+    'translatable' => FALSE,
+  ];
+  field_create_field($field);
+
+  $instance__notification = [
+    'field_name' => 'webpush_topics',
+    'entity_type' => 'webpush_notification',
+    'bundle' => 'webpush_notification',
+    'label' => 'Topics',
+    'required' => FALSE,
+    'widget' => [
+      'type' => 'options_select',
+    ],
+  ];
+  field_create_instance($instance__notification);
+
+  $instance__subscription = [
+    'field_name' => 'webpush_topics',
+    'entity_type' => 'webpush_subscription',
+    'bundle' => 'webpush_subscription',
+    'label' => 'Topics',
+    'required' => FALSE,
+    'widget' => [
+      'type' => 'options_select',
+    ],
+  ];
+  field_create_instance($instance__subscription);
+}
+
+function _webpush_topics_delete_fields() {
+  field_delete_field('webpush_topics');
 }
