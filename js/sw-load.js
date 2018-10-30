@@ -37,7 +37,7 @@
       // changes the permission manually
       if (Notification.permission === 'denied') {
         console.warn('Notifications are denied by the user');
-        Drupal.behaviors.webPush.fn.changePushButtonState('userdenied');
+        Drupal.behaviors.webPush.fn.updateWebpushState('userdenied');
         return;
       }
 
@@ -47,7 +47,7 @@
             Drupal.behaviors.webPush.fn.push_updateSubscription();
           }, e => {
             console.error('[SW] Service worker registration failed', e);
-            Drupal.behaviors.webPush.fn.changePushButtonState('incompatible');
+            Drupal.behaviors.webPush.fn.updateWebpushState('incompatible');
           });
 
     },
@@ -63,19 +63,19 @@
       unsupportedFeatures: function () {
         if (!('serviceWorker' in navigator)) {
           console.warn("Service workers are not supported by this browser");
-          this.changePushButtonState('incompatible');
+          this.updateWebpushState('incompatible');
           return true;
         }
 
         if (!('PushManager' in window)) {
           console.warn('Push notifications are not supported by this browser');
-          this.changePushButtonState('incompatible');
+          this.updateWebpushState('incompatible');
           return true;
         }
 
         if (!('showNotification' in ServiceWorkerRegistration.prototype)) {
           console.warn('Notifications are not supported by this browser');
-          this.changePushButtonState('incompatible');
+          this.updateWebpushState('incompatible');
           return true;
         }
         return false;
@@ -118,7 +118,7 @@
       push_updateSubscription: function () {
         navigator.serviceWorker.ready.then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.getSubscription())
             .then(subscription => {
-              Drupal.behaviors.webPush.fn.changePushButtonState('disabled');
+              Drupal.behaviors.webPush.fn.updateWebpushState('disabled');
 
               if (!subscription) {
                 // We aren't subscribed to push, so set UI to allow the user to
@@ -129,14 +129,14 @@
               // Keep your server in sync with the latest endpoint
               return Drupal.behaviors.webPush.fn.push_sendSubscriptionToServer(subscription, 'PUT');
             })
-            .then(subscription => subscription && Drupal.behaviors.webPush.fn.changePushButtonState('enabled')) // Set your UI to show they have subscribed for push messages
+            .then(subscription => subscription && Drupal.behaviors.webPush.fn.updateWebpushState('enabled')) // Set your UI to show they have subscribed for push messages
             .catch(e => {
               console.error('Error when updating the subscription', e);
             });
       },
 
       push_subscribe: function () {
-        Drupal.behaviors.webPush.fn.changePushButtonState('computing');
+        Drupal.behaviors.webPush.fn.updateWebpushState('computing');
 
         navigator.serviceWorker.ready
             .then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.subscribe({
@@ -148,7 +148,7 @@
               // create subscription on your server
               return Drupal.behaviors.webPush.fn.push_sendSubscriptionToServer(subscription, 'POST');
             })
-            .then(subscription => subscription && Drupal.behaviors.webPush.fn.changePushButtonState('enabled')) // update your UI
+            .then(subscription => subscription && Drupal.behaviors.webPush.fn.updateWebpushState('enabled')) // update your UI
             .catch(e => {
               if (Notification.permission === 'denied') {
                 // The user denied the notification permission which
@@ -156,19 +156,19 @@
                 // to manually change the notification permission to
                 // subscribe to push messages
                 console.warn('Notifications are denied by the user.');
-                Drupal.behaviors.webPush.fn.changePushButtonState('userdenied');
+                Drupal.behaviors.webPush.fn.updateWebpushState('userdenied');
               }
               else {
                 // A problem occurred with the subscription; common reasons
                 // include network errors or the user skipped the permission
                 console.error('Impossible to subscribe to push notifications', e);
-                Drupal.behaviors.webPush.fn.changePushButtonState('disabled');
+                Drupal.behaviors.webPush.fn.updateWebpushState('disabled');
               }
             });
       },
 
       push_unsubscribe: function () {
-        Drupal.behaviors.webPush.fn.changePushButtonState('computing');
+        Drupal.behaviors.webPush.fn.updateWebpushState('computing');
 
         // To unsubscribe from push messaging, you need to get the subscription
         // object
@@ -179,7 +179,7 @@
               if (!subscription) {
                 // No subscription object, so set the state
                 // to allow the user to subscribe to push
-                Drupal.behaviors.webPush.fn.changePushButtonState('disabled');
+                Drupal.behaviors.webPush.fn.updateWebpushState('disabled');
                 return;
               }
 
@@ -188,20 +188,20 @@
               return Drupal.behaviors.webPush.fn.push_sendSubscriptionToServer(subscription, 'DELETE');
             })
             .then(subscription => subscription.unsubscribe())
-            .then(() => Drupal.behaviors.webPush.fn.changePushButtonState('disabled'))
+            .then(() => Drupal.behaviors.webPush.fn.updateWebpushState('disabled'))
             .catch(e => {
               // We failed to unsubscribe, this can lead to
               // an unusual state, so  it may be best to remove
               // the users data from your data store and
               // inform the user that you have done so
               console.error('Error when unsubscribing the user', e);
-              Drupal.behaviors.webPush.fn.changePushButtonState('disabled', $pushButton);
+              Drupal.behaviors.webPush.fn.updateWebpushState('disabled', $pushButton);
             });
       },
 
 
 
-      changePushButtonState: function (state) {
+      updateWebpushState: function (state) {
         const $pushButton = Drupal.behaviors.webPush.pushButton;
         const $messageSpan = $pushButton.find('span.webpush-subscription-message');
 
