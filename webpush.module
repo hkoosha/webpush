@@ -158,8 +158,8 @@ function webpush_preprocess_html(&$variables) {
  */
 function webpush_block_info() {
   $blocks = [];
-  $blocks['webpush_user_panel'] = [
-    'info' => t('Webpush user panel'),
+  $blocks['webpush_toggle_icon'] = [
+    'info' => t('Webpush toggle icon'),
   ];
 
   return $blocks;
@@ -172,7 +172,7 @@ function webpush_block_view($delta = '') {
   $block = [];
 
   switch ($delta) {
-    case 'webpush_user_panel' :
+    case 'webpush_toggle_icon' :
       $block['content'] = _webpush_block_build();
       break;
   }
