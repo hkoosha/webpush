@@ -105,6 +105,9 @@
 
     updateWebpushState: function (state) {
       const $subButton = this.subButton;
+      if (!$subButton) {
+        return; // @TODO need to handle it better.
+      }
       const $messageSpan = $subButton.find('#webpush-subscription-message');
 
       let message = '';
@@ -143,7 +146,6 @@
           $subButton.addClass('not-working');
           break;
       }
-
     },
 
 
