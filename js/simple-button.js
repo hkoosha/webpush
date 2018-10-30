@@ -1,5 +1,5 @@
 (function ($, Drupal) {
-  Drupal.behaviors.webPush = {
+  Drupal.behaviors.webPushSimpleButton = {
     attach: function (context, settings) {
 
       if (!this.app.initializeApplicationServerKey()) {
@@ -32,7 +32,7 @@
       navigator.serviceWorker.register("webpush/serviceworker/js", {scope: '/'})
           .then(() => {
             console.log('[SW] Service worker has been registered');
-            Drupal.behaviors.webPush.fn.push_updateSubscription();
+            Drupal.behaviors.webPushSimpleButton.fn.push_updateSubscription();
           }, e => {
             console.error('[SW] Service worker registration failed', e);
             Drupal.behaviors.webPushApp.updateWebpushState('incompatible');
@@ -55,10 +55,10 @@
           $(this).click(function () {
             const $button = $(this);
             if (Drupal.behaviors.webPushApp.isPushEnabled) {
-              Drupal.behaviors.webPush.fn.push_unsubscribe($button);
+              Drupal.behaviors.webPushSimpleButton.fn.push_unsubscribe($button);
             }
             else {
-              Drupal.behaviors.webPush.fn.push_subscribe($button);
+              Drupal.behaviors.webPushSimpleButton.fn.push_subscribe($button);
             }
           });
         });

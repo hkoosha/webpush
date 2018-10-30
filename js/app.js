@@ -66,7 +66,7 @@
     },
 
     updateWebpushState: function (state) {
-      const $subButton = Drupal.behaviors.webPushApp.subButton;
+      const $subButton = this.subButton;
       const $messageSpan = $subButton.find('#webpush-subscription-message');
 
       let message = '';
@@ -75,15 +75,13 @@
         case 'enabled':
           message = 'Disable Push notifications';
           $messageSpan.text(message);
-          Drupal.behaviors.webPush.isPushEnabled = true;
-          Drupal.behaviors.webPushApp.isPushEnabled = true;
+          this.isPushEnabled = true;
           $subButton.addClass('working');
           break;
         case 'disabled':
           message = 'Enable Push notifications';
           $messageSpan.text(message);
-          Drupal.behaviors.webPush.isPushEnabled = false;
-          Drupal.behaviors.webPushApp.isPushEnabled = false;
+          this.isPushEnabled = false;
           $subButton.addClass('working');
           break;
         case 'computing':
