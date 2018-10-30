@@ -65,6 +65,50 @@
       }).then(() => subscription);
     },
 
+    updateWebpushState: function (state) {
+      const $subButton = Drupal.behaviors.webPushApp.subButton;
+      const $messageSpan = $subButton.find('#webpush-subscription-message');
+
+      let message = '';
+
+      switch (state) {
+        case 'enabled':
+          message = 'Disable Push notifications';
+          $messageSpan.text(message);
+          Drupal.behaviors.webPush.isPushEnabled = true;
+          Drupal.behaviors.webPushApp.isPushEnabled = true;
+          $subButton.addClass('working');
+          break;
+        case 'disabled':
+          message = 'Enable Push notifications';
+          $messageSpan.text(message);
+          Drupal.behaviors.webPush.isPushEnabled = false;
+          Drupal.behaviors.webPushApp.isPushEnabled = false;
+          $subButton.addClass('working');
+          break;
+        case 'computing':
+          message = 'Loading...';
+          $messageSpan.text(message);
+          break;
+        case 'incompatible':
+          message = 'Push notifications are not compatible with this browser';
+          $messageSpan.text(message);
+          $subButton.addClass('not-working');
+          break;
+        case 'userdenied':
+          message = 'The user has denied push notifications';
+          $messageSpan.text(message);
+          $subButton.addClass('not-working');
+          break;
+        default:
+          message = 'Unknown push notifications state';
+          $messageSpan.text(message);
+          console.error('Unhandled push button state', state);
+          $subButton.addClass('not-working');
+          break;
+      }
+
+    },
 
   };
 })(jQuery, Drupal);
