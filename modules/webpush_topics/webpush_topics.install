@@ -27,11 +27,6 @@ function _webpush_topics_create_taxonomy_vocabulary() {
   $new_vocab->description = 'Categorization topics for your push notifications.';
   $new_vocab->machine_name = 'webpush_topics';
   taxonomy_vocabulary_save($new_vocab);
-
-  // @TODO dedup. Keep this for now.
-  //  $vocab = taxonomy_vocabulary_machine_name_load('webpush_topics');
-  //  $vid = $vocab->vid;
-  //  variable_set('webpush_topics_vid', $vid);
 }
 
 /**
