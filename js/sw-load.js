@@ -9,28 +9,18 @@
 
       this.isPushEnabled = false;
 
-      // If there is no subscription related button, nothing to do here.
-      this.pushButton = $('#webpush-subscription-button');
-      if (!this.pushButton) {
-        return;
-      }
 
       // If the features are not supported by the browser, stop here.
       if (this.fn.unsupportedFeatures()) {
         return;
       }
 
-      // Subscription button
-      this.pushButton.once('webpush-subscription-click', function () {
-        $(this).click(function () {
-          if (Drupal.behaviors.webPush.isPushEnabled) {
-            Drupal.behaviors.webPush.fn.push_unsubscribe();
-          }
-          else {
-            Drupal.behaviors.webPush.fn.push_subscribe();
-          }
-        });
-      });
+      // Initialize button
+      let initializeButton = this.fn.initializeButton();
+      if (!initializeButton) {
+        return;
+      }
+
 
       // Check the current Notification permission.
       // If its denied, the button should appears as such, until the user
@@ -113,6 +103,27 @@
         }).then(() => subscription);
       },
 
+
+      initializeButton: function () {
+        // If there is no subscription related button, nothing to do here.
+        Drupal.behaviors.webPush.pushButton = $('#webpush-subscription-button');
+        if (!Drupal.behaviors.webPush.pushButton) {
+          return false;
+        }
+
+        Drupal.behaviors.webPush.pushButton.once('webpush-subscription-click', function () {
+          $(this).click(function () {
+            if (Drupal.behaviors.webPush.isPushEnabled) {
+              Drupal.behaviors.webPush.fn.push_unsubscribe();
+            }
+            else {
+              Drupal.behaviors.webPush.fn.push_subscribe();
+            }
+          });
+        });
+
+        return true;
+      },
 
 
       push_updateSubscription: function () {
