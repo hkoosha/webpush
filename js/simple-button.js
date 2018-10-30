@@ -2,16 +2,7 @@
   Drupal.behaviors.webPushSimpleButton = {
     attach: function (context, settings) {
 
-      if (!this.app.initializeApplicationServerKey()) {
-        return;
-      }
 
-      this.app.isPushEnabled = false;
-
-      // If the features are not supported by the browser, stop here.
-      if (this.app.unsupportedFeatures()) {
-        return;
-      }
 
       // Initialize button
       let initializeSimpleButton = this.fn.initializeSimpleButton();
@@ -55,10 +46,10 @@
           $(this).click(function () {
             const $button = $(this);
             if (Drupal.behaviors.webPushApp.isPushEnabled) {
-              Drupal.behaviors.webPushSimpleButton.fn.push_unsubscribe($button);
+              Drupal.behaviors.webPushSimpleButton.fn.push_unsubscribe({button: $button});
             }
             else {
-              Drupal.behaviors.webPushSimpleButton.fn.push_subscribe($button);
+              Drupal.behaviors.webPushSimpleButton.fn.push_subscribe({button: $button});
             }
           });
         });
@@ -87,7 +78,7 @@
             });
       },
 
-      push_subscribe: function ($button) {
+      push_subscribe: function (data) {
         Drupal.behaviors.webPushApp.updateWebpushState('computing');
 
         navigator.serviceWorker.ready
@@ -119,7 +110,7 @@
             });
       },
 
-      push_unsubscribe: function ($button) {
+      push_unsubscribe: function (data) {
         Drupal.behaviors.webPushApp.updateWebpushState('computing');
 
         // To unsubscribe from push messaging, you need to get the subscription

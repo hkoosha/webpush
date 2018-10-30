@@ -1,6 +1,21 @@
 (function ($, Drupal) {
   Drupal.behaviors.webPushApp = {
 
+    attach: function (context, settings) {
+      if (!this.initializeApplicationServerKey()) {
+        return;
+      }
+
+      this.isPushEnabled = false;
+
+      // If the features are not supported by the browser, stop here.
+      if (this.unsupportedFeatures()) {
+        return;
+      }
+
+
+    },
+
     isPushEnabled: false,
 
     applicationServerKey: false,
