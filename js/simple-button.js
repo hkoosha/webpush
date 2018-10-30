@@ -44,24 +44,25 @@
 
     isPushEnabled: false,
 
-    subButton: $('#webpush-subscription-button'),
+    // subButton: $('#webpush-subscription-button'),
 
     fn: {
 
       initializeSimpleButton: function () {
         // If there is no subscription related button, nothing to do here.
-        Drupal.behaviors.webPush.subButton = $('#webpush-subscription-button');
-        if (!Drupal.behaviors.webPush.subButton) {
+        Drupal.behaviors.webPushApp.subButton = $('#webpush-subscription-button');
+        if (!Drupal.behaviors.webPushApp.subButton) {
           return false;
         }
 
-        Drupal.behaviors.webPush.subButton.once('webpush-subscription-click', function () {
+        Drupal.behaviors.webPushApp.subButton.once('webpush-subscription-click', function () {
           $(this).click(function () {
+            const $button = $(this);
             if (Drupal.behaviors.webPush.isPushEnabled) {
-              Drupal.behaviors.webPush.fn.push_unsubscribe();
+              Drupal.behaviors.webPush.fn.push_unsubscribe($button);
             }
             else {
-              Drupal.behaviors.webPush.fn.push_subscribe();
+              Drupal.behaviors.webPush.fn.push_subscribe($button);
             }
           });
         });
@@ -90,7 +91,7 @@
             });
       },
 
-      push_subscribe: function () {
+      push_subscribe: function ($button) {
         Drupal.behaviors.webPush.fn.updateWebpushState('computing');
 
         navigator.serviceWorker.ready
@@ -122,7 +123,7 @@
             });
       },
 
-      push_unsubscribe: function () {
+      push_unsubscribe: function ($button) {
         Drupal.behaviors.webPush.fn.updateWebpushState('computing');
 
         // To unsubscribe from push messaging, you need to get the subscription
@@ -155,33 +156,28 @@
       },
 
       updateWebpushState: function (state) {
-        const $subButton = Drupal.behaviors.webPush.subButton;
+        const $subButton = Drupal.behaviors.webPushApp.subButton;
         const $messageSpan = $('#webpush-subscription-message');
 
         switch (state) {
           case 'enabled':
-            $subButton.disabled = false;
             $messageSpan.text("Disable Push notifications");
             Drupal.behaviors.webPush.isPushEnabled = true;
             $subButton.addClass('working');
             break;
           case 'disabled':
-            $subButton.disabled = false;
             $messageSpan.text("Enable Push notifications");
             Drupal.behaviors.webPush.isPushEnabled = false;
             $subButton.addClass('working');
             break;
           case 'computing':
-            $subButton.disabled = true;
             $messageSpan.text("Loading...");
             break;
           case 'incompatible':
-            $subButton.disabled = true;
             $messageSpan.text("Push notifications are not compatible with this browser");
             $subButton.addClass('not-working');
             break;
           case 'userdenied':
-            $subButton.disabled = true;
             $messageSpan.text("The user has denied push notifications");
             $subButton.addClass('not-working');
             break;

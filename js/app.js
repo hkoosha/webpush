@@ -10,6 +10,8 @@
       return this.applicationServerKey;
     },
 
+    subButton: false,
+
     unsupportedFeatures: function () {
       if (!('serviceWorker' in navigator)) {
         console.warn("Service workers are not supported by this browser");
