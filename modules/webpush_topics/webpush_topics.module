@@ -1,2 +1,67 @@
 <?php
 
+/**
+ * Implements hook_block_info().
+ */
+function webpush_topics_block_info() {
+  $blocks = [];
+  $blocks['webpush_user_panel'] = [
+    'info' => t('Webpush user panel'),
+  ];
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function webpush_topics_block_view($delta = '') {
+  $block = [];
+
+  switch ($delta) {
+    case 'webpush_user_panel' :
+      $block['content'] = theme('webpush_topics_user_panel', _webpush_topics_block_variables());
+
+      // Add some css.
+      drupal_add_css(drupal_get_path('module', 'webpush_topics') . '/css/webpush_user_panel.css');
+
+      break;
+  }
+
+  return $block;
+}
+
+function _webpush_topics_block_variables() {
+  $variables = [];
+
+  $topics = _webpush_topics_get_topics();
+  $variables['topics'] = $topics;
+
+  return $variables;
+}
+
+function _webpush_topics_get_topics() {
+  $topics = [];
+  $topics[0] = t('All');
+  $vocabulary = taxonomy_vocabulary_machine_name_load('webpush_topics');
+  $terms = entity_load('taxonomy_term', FALSE, ['vid' => $vocabulary->vid]);
+  foreach ($terms as $tid => $term) {
+    $topics[$tid] = $term->name;
+  }
+  return $topics;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function webpush_topics_theme($existing, $type, $theme, $path) {
+  return [
+    'webpush_topics_user_panel' => [
+      'template' => 'webpush-topics--user-panel',
+      'variables' => [
+        'topics' => NULL,
+      ],
+    ],
+  ];
+
+}
