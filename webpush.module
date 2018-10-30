@@ -144,7 +144,8 @@ function webpush_preprocess_html(&$variables) {
     return;
   }
 
-  // Load the helper script.
+  // Load the helper scripts.
+  drupal_add_js(drupal_get_path('module', 'webpush') . '/js/app.js', 'file');
   drupal_add_js(drupal_get_path('module', 'webpush') . '/js/simple-button.js', 'file');
   // Load the service worker.
   drupal_add_js(['webpush' => ['path' => url('/webpush/serviceworker/js')]], 'setting');
@@ -184,7 +185,7 @@ function _webpush_block_build() {
   $block = [
     'message' => [
       '#type' => 'markup',
-      '#markup' => '<div id="webpush-subscription-button"><span class="webpush-subscription-message"></span></div>',
+      '#markup' => '<div id="webpush-subscription-button"><span id="webpush-subscription-message"></span></div>',
       '#suffix' => '',
     ],
   ];

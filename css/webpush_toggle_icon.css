@@ -18,7 +18,7 @@
   cursor: not-allowed;
 }
 
-.webpush-subscription-message {
+#webpush-subscription-message {
   position: absolute;
   bottom: 100%;
   left: 0;
@@ -28,6 +28,6 @@
   width: 240px;
 }
 
-#webpush-subscription-button:hover .webpush-subscription-message {
+#webpush-subscription-button:hover #webpush-subscription-message {
   display: block;
 }

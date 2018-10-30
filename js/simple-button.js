@@ -2,16 +2,14 @@
   Drupal.behaviors.webPush = {
     attach: function (context, settings) {
 
-      this.applicationServerKey = ('webpush' in Drupal.settings) ? Drupal.settings.webpush.applicationServerKey : false;
-      if (!this.applicationServerKey) {
+      if (!this.app.initializeApplicationServerKey()) {
         return;
       }
 
       this.isPushEnabled = false;
 
-
       // If the features are not supported by the browser, stop here.
-      if (this.fn.unsupportedFeatures()) {
+      if (this.app.unsupportedFeatures()) {
         return;
       }
 
@@ -42,74 +40,22 @@
 
     },
 
+    app: Drupal.behaviors.webPushApp,
+
     isPushEnabled: false,
 
-    pushButton: $('#webpush-subscription-button'),
+    subButton: $('#webpush-subscription-button'),
 
     fn: {
 
-      unsupportedFeatures: function () {
-        if (!('serviceWorker' in navigator)) {
-          console.warn("Service workers are not supported by this browser");
-          this.updateWebpushState('incompatible');
-          return true;
-        }
-
-        if (!('PushManager' in window)) {
-          console.warn('Push notifications are not supported by this browser');
-          this.updateWebpushState('incompatible');
-          return true;
-        }
-
-        if (!('showNotification' in ServiceWorkerRegistration.prototype)) {
-          console.warn('Notifications are not supported by this browser');
-          this.updateWebpushState('incompatible');
-          return true;
-        }
-        return false;
-      },
-
-      urlBase64ToUint8Array: function (base64String) {
-        const padding = '='.repeat((4 - base64String.length % 4) % 4);
-        const base64 = (base64String + padding)
-            .replace(/\-/g, '+')
-            .replace(/_/g, '/');
-
-        const rawData = window.atob(base64);
-        const outputArray = new Uint8Array(rawData.length);
-
-        for (let i = 0; i < rawData.length; ++i) {
-          outputArray[i] = rawData.charCodeAt(i);
-        }
-        return outputArray;
-      },
-
-      push_sendSubscriptionToServer: function (subscription, method) {
-        const key = subscription.getKey('p256dh');
-        const token = subscription.getKey('auth');
-        const contentEncoding = (PushManager.supportedContentEncodings || ['aesgcm'])[0];
-
-        let d = new Date();
-        return fetch('/webpush/subscription-registration?' + d.getTime(), {
-          method,
-          body: JSON.stringify({
-            endpoint: subscription.endpoint,
-            publicKey: key ? btoa(String.fromCharCode.apply(null, new Uint8Array(key))) : null,
-            authToken: token ? btoa(String.fromCharCode.apply(null, new Uint8Array(token))) : null,
-            contentEncoding,
-          }),
-        }).then(() => subscription);
-      },
-
-
       initializeSimpleButton: function () {
         // If there is no subscription related button, nothing to do here.
-        Drupal.behaviors.webPush.pushButton = $('#webpush-subscription-button');
-        if (!Drupal.behaviors.webPush.pushButton) {
+        Drupal.behaviors.webPush.subButton = $('#webpush-subscription-button');
+        if (!Drupal.behaviors.webPush.subButton) {
           return false;
         }
 
-        Drupal.behaviors.webPush.pushButton.once('webpush-subscription-click', function () {
+        Drupal.behaviors.webPush.subButton.once('webpush-subscription-click', function () {
           $(this).click(function () {
             if (Drupal.behaviors.webPush.isPushEnabled) {
               Drupal.behaviors.webPush.fn.push_unsubscribe();
@@ -136,7 +82,7 @@
               }
 
               // Keep your server in sync with the latest endpoint
-              return Drupal.behaviors.webPush.fn.push_sendSubscriptionToServer(subscription, 'PUT');
+              return Drupal.behaviors.webPushApp.push_sendSubscriptionToServer(subscription, 'PUT');
             })
             .then(subscription => subscription && Drupal.behaviors.webPush.fn.updateWebpushState('enabled')) // Set your UI to show they have subscribed for push messages
             .catch(e => {
@@ -150,12 +96,12 @@
         navigator.serviceWorker.ready
             .then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.subscribe({
               userVisibleOnly: true,
-              applicationServerKey: Drupal.behaviors.webPush.fn.urlBase64ToUint8Array(Drupal.behaviors.webPush.applicationServerKey),
+              applicationServerKey: Drupal.behaviors.webPushApp.urlBase64ToUint8Array(Drupal.behaviors.webPushApp.applicationServerKey),
             }))
             .then(subscription => {
               // Subscription was successful
               // create subscription on your server
-              return Drupal.behaviors.webPush.fn.push_sendSubscriptionToServer(subscription, 'POST');
+              return Drupal.behaviors.webPushApp.push_sendSubscriptionToServer(subscription, 'POST');
             })
             .then(subscription => subscription && Drupal.behaviors.webPush.fn.updateWebpushState('enabled')) // update your UI
             .catch(e => {
@@ -194,7 +140,7 @@
 
               // We have a subscription, unsubscribe
               // Remove push subscription from server
-              return Drupal.behaviors.webPush.fn.push_sendSubscriptionToServer(subscription, 'DELETE');
+              return Drupal.behaviors.webPushApp.push_sendSubscriptionToServer(subscription, 'DELETE');
             })
             .then(subscription => subscription.unsubscribe())
             .then(() => Drupal.behaviors.webPush.fn.updateWebpushState('disabled'))
@@ -204,44 +150,44 @@
               // the users data from your data store and
               // inform the user that you have done so
               console.error('Error when unsubscribing the user', e);
-              Drupal.behaviors.webPush.fn.updateWebpushState('disabled', $pushButton);
+              Drupal.behaviors.webPush.fn.updateWebpushState('disabled', $subButton);
             });
       },
 
       updateWebpushState: function (state) {
-        const $pushButton = Drupal.behaviors.webPush.pushButton;
-        const $messageSpan = $pushButton.find('span.webpush-subscription-message');
+        const $subButton = Drupal.behaviors.webPush.subButton;
+        const $messageSpan = $('#webpush-subscription-message');
 
         switch (state) {
           case 'enabled':
-            $pushButton.disabled = false;
+            $subButton.disabled = false;
             $messageSpan.text("Disable Push notifications");
             Drupal.behaviors.webPush.isPushEnabled = true;
-            $pushButton.addClass('working');
+            $subButton.addClass('working');
             break;
           case 'disabled':
-            $pushButton.disabled = false;
+            $subButton.disabled = false;
             $messageSpan.text("Enable Push notifications");
             Drupal.behaviors.webPush.isPushEnabled = false;
-            $pushButton.addClass('working');
+            $subButton.addClass('working');
             break;
           case 'computing':
-            $pushButton.disabled = true;
+            $subButton.disabled = true;
             $messageSpan.text("Loading...");
             break;
           case 'incompatible':
-            $pushButton.disabled = true;
+            $subButton.disabled = true;
             $messageSpan.text("Push notifications are not compatible with this browser");
-            $pushButton.addClass('not-working');
+            $subButton.addClass('not-working');
             break;
           case 'userdenied':
-            $pushButton.disabled = true;
+            $subButton.disabled = true;
             $messageSpan.text("The user has denied push notifications");
-            $pushButton.addClass('not-working');
+            $subButton.addClass('not-working');
             break;
           default:
             console.error('Unhandled push button state', state);
-            $pushButton.addClass('not-working');
+            $subButton.addClass('not-working');
             break;
         }
 
