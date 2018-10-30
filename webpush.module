@@ -145,7 +145,7 @@ function webpush_preprocess_html(&$variables) {
   }
 
   // Load the helper script.
-  drupal_add_js(drupal_get_path('module', 'webpush') . '/js/sw-load.js', 'file');
+  drupal_add_js(drupal_get_path('module', 'webpush') . '/js/simple-button.js', 'file');
   // Load the service worker.
   drupal_add_js(['webpush' => ['path' => url('/webpush/serviceworker/js')]], 'setting');
   // Send the public key to js.

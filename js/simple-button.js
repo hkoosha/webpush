@@ -16,8 +16,8 @@
       }
 
       // Initialize button
-      let initializeButton = this.fn.initializeButton();
-      if (!initializeButton) {
+      let initializeSimpleButton = this.fn.initializeSimpleButton();
+      if (!initializeSimpleButton) {
         return;
       }
 
@@ -41,8 +41,6 @@
           });
 
     },
-
-    applicationServerKey: ('webpush' in Drupal.settings) ? Drupal.settings.webpush.applicationServerKey : false,
 
     isPushEnabled: false,
 
@@ -104,7 +102,7 @@
       },
 
 
-      initializeButton: function () {
+      initializeSimpleButton: function () {
         // If there is no subscription related button, nothing to do here.
         Drupal.behaviors.webPush.pushButton = $('#webpush-subscription-button');
         if (!Drupal.behaviors.webPush.pushButton) {
@@ -210,8 +208,6 @@
             });
       },
 
-
-
       updateWebpushState: function (state) {
         const $pushButton = Drupal.behaviors.webPush.pushButton;
         const $messageSpan = $pushButton.find('span.webpush-subscription-message');
@@ -248,6 +244,7 @@
             $pushButton.addClass('not-working');
             break;
         }
+
       },
 
     },
