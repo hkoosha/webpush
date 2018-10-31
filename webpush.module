@@ -211,12 +211,14 @@ function _webpush_block_build() {
 
 function webpush_subscription_registration_callback() {
   $subscription_input = json_decode(file_get_contents('php://input'), TRUE);
-  $subscription = Minishlink\WebPush\Subscription::create([
-    'endpoint' => $subscription_input['endpoint'],
-    'authToken' => $subscription_input['authToken'],
-    'publicKey' => $subscription_input['publicKey'],
-    'contentEncoding' => $subscription_input['contentEncoding'],
-  ]);
+  $subscription = $subscription_input ?
+    Minishlink\WebPush\Subscription::create([
+      'endpoint' => $subscription_input['endpoint'],
+      'authToken' => $subscription_input['authToken'],
+      'publicKey' => $subscription_input['publicKey'],
+      'contentEncoding' => $subscription_input['contentEncoding'],
+    ]) :
+    FALSE;
   $data = $subscription_input['data'] ?? FALSE;
 
   switch ($_SERVER['REQUEST_METHOD']) {
@@ -228,6 +230,20 @@ function webpush_subscription_registration_callback() {
     case 'DELETE':
       webpush_delete($subscription);
       break;
+
+    case 'GET':
+
+      if ($subscription) {
+        // @TODO return subscription stuff
+      }
+      else {
+        // @TODO return something "not found"
+        drupal_json_output(['aaa' => 'bbb']);
+        drupal_exit();
+        return;
+      }
+      break;
+
 
     default:
       // Error: method not handled.
@@ -248,12 +264,12 @@ function webpush_subscription_registration_callback() {
  */
 function webpush_register(Minishlink\WebPush\Subscription $subscription, $data = FALSE) {
   // @TODO restore conditional and implement update!!
-//  if (!webpush_register__retrieve_entity($subscription)) {
-    webpush_register__create_entity($subscription, $data);
-//  }
-//  else {
-//
-//  }
+  //  if (!webpush_register__retrieve_entity($subscription)) {
+  webpush_register__create_entity($subscription, $data);
+  //  }
+  //  else {
+  //
+  //  }
 }
 
 /**
@@ -271,6 +287,10 @@ function webpush_delete(Minishlink\WebPush\Subscription $subscription) {
  * @param \Minishlink\WebPush\Subscription $subscription
  *
  * @param $data
+ * It is expecting to receive an associative array where keys will be field
+ * (or properties) machine names, and values will be the actual value to be
+ * stored in the field/property.
+ * Check webpush_topics submodule for an example implementation.
  *
  * @return bool
  */
