@@ -5,14 +5,15 @@
  * Things left todo:
  *
  *
- * - Implement topics on separate module
- *
  * - Implement user control panel for topics
+ *    - Prefill the existing values
+ *    - Alter send form
  *
  * - Fix: notifications listing page, default view does not work
  *
  * - Notification entity: store total and successfull deliveries
  *
+ * - SOS: Handle multiple buttons at the same page
  */
 
 
