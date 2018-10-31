@@ -13,10 +13,10 @@
         $(this).click(function () {
           const $button = $(this);
           if (Drupal.behaviors.webPushApp.isPushEnabled) {
-            Drupal.behaviors.webPushApp.push_unsubscribe({button: $button});
+            Drupal.behaviors.webPushApp.push_unsubscribe({});
           }
           else {
-            Drupal.behaviors.webPushApp.push_subscribe({button: $button});
+            Drupal.behaviors.webPushApp.push_subscribe({});
           }
         });
       });
