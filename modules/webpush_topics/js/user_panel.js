@@ -16,12 +16,12 @@
           const $button = $(this);
           const $checked = document.querySelectorAll('input.webpush-topics');
           const topics = [...$checked].map(i => { return i.checked ? i.value : false; }).filter(i => i !== false);
-          console.log(topics);
+          // @TODO: This is wrong! First click unsubs, and second subs.
           if (Drupal.behaviors.webPushApp.isPushEnabled) {
             Drupal.behaviors.webPushApp.push_unsubscribe();
           }
           else {
-            Drupal.behaviors.webPushApp.push_subscribe({field_topics: topics});
+            Drupal.behaviors.webPushApp.push_subscribe({webpush_topics: topics});
           }
         });
       });
@@ -33,8 +33,8 @@
 
     initializeCheckboxes: function () {
       const $panel = $('#webpush-topics-panel');
-      const $checkboxAll = $panel.find('input[name="webpush-topic-0"]');
-      const $checkboxes = $panel.find('input[type="checkbox"]').not('[name="webpush-topic-0"]');
+      const $checkboxAll = $panel.find('input[name="webpush-topic-all"]');
+      const $checkboxes = $panel.find('input[type="checkbox"]').not('[name="webpush-topic-all"]');
       $checkboxAll.change(function () {
         if (this.checked) {
           $checkboxes.prop("checked", true).attr("disabled", true);

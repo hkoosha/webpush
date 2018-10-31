@@ -247,12 +247,13 @@ function webpush_subscription_registration_callback() {
  * @throws \Exception
  */
 function webpush_register(Minishlink\WebPush\Subscription $subscription, $data = FALSE) {
-  if (!webpush_register__retrieve_entity($subscription)) {
-    webpush_register__create_entity($subscription);
-  }
-  else {
-    // @TODO implement update!!
-  }
+  // @TODO restore conditional and implement update!!
+//  if (!webpush_register__retrieve_entity($subscription)) {
+    webpush_register__create_entity($subscription, $data);
+//  }
+//  else {
+//
+//  }
 }
 
 /**
@@ -269,18 +270,47 @@ function webpush_delete(Minishlink\WebPush\Subscription $subscription) {
  *
  * @param \Minishlink\WebPush\Subscription $subscription
  *
+ * @param $data
+ *
  * @return bool
- * @throws \Exception
  */
-function webpush_register__create_entity(Minishlink\WebPush\Subscription $subscription) {
+function webpush_register__create_entity(Minishlink\WebPush\Subscription $subscription, $data) {
   $serialized = serialize($subscription);
 
   $entity_type = 'webpush_subscription';
   $entity = entity_create($entity_type, [
     'subscription' => $serialized,
-    'created' => REQUEST_TIME,
+    'created' => format_date(REQUEST_TIME, 'custom', 'Y-m-d H:i:s'),
   ]);
   $entity->save();
+
+  if (is_array($data)) {
+    // Give an opportunity to other modules to alter the incoming data before we
+    // assign the values to fields.
+    drupal_alter('webpush_create_subscription', $data);
+
+    // Just for safety reasons, because the drupal_alter might have unset all
+    // the fields.
+    if (empty($data)) {
+      return $entity;
+    }
+
+    try {
+      $entity_wrapper = entity_metadata_wrapper('webpush_subscription', $entity);
+      foreach ($data as $field => $values) {
+        $entity_wrapper->$field->set($values);
+      }
+      $entity_wrapper->save();
+    } catch (EntityMetadataWrapperException $e) {
+      watchdog(
+        'webpush',
+        $e->getMessage() . '<br>See ' . __FUNCTION__ . '():' . __LINE__ . ' <pre>!trace</pre>',
+        ['!trace' => $e->getTraceAsString()],
+        WATCHDOG_ERROR
+      );
+    }
+  }
+
   return $entity;
 }
 
@@ -290,7 +320,7 @@ function webpush_notification__create_entity($title, $body, $link) {
     'title' => $title,
     'body' => $body,
     'link' => $link,
-    'created' => REQUEST_TIME,
+    'created' => format_date(REQUEST_TIME, 'custom', 'Y-m-d H:i:s'),
   ]);
   $entity->save();
 
