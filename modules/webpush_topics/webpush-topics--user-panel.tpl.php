@@ -6,10 +6,13 @@
       <?php
         foreach ($topics as $tid => $topic):
        ?>
-          <label><input type="checkbox" name="webpush-topic-<?php print $tid; ?>" value="<?php print $tid; ?>"><?php print $topic; ?></label>
+          <label><input type="checkbox" class="webpush-topics" name="webpush-topic-<?php print $tid; ?>" value="<?php print $tid; ?>"><?php print $topic; ?></label>
       <?php
         endforeach;
       ?>
+          <button id="webpush-topics-subscribe"><?php print t('Save'); ?></button>
+
+          <span id="webpush-subscription-message"></span>
     </div>
 
 </div>

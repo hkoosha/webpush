@@ -97,8 +97,8 @@
           endpoint: subscription.endpoint,
           publicKey: key ? btoa(String.fromCharCode.apply(null, new Uint8Array(key))) : null,
           authToken: token ? btoa(String.fromCharCode.apply(null, new Uint8Array(token))) : null,
-          contentEncoding,
-          data: data
+          contentEncoding: contentEncoding,
+          data: data,
         }),
       }).then(() => subscription);
     },
@@ -108,10 +108,10 @@
       if (!$subButton) {
         return; // @TODO need to handle it better.
       }
-      const $messageSpan = $subButton.find('#webpush-subscription-message');
+      const $messageSpan = $('#webpush-subscription-message');
 
       let message = '';
-
+      $subButton.attr('data-webpush-state', state);
       switch (state) {
         case 'enabled':
           message = 'Disable Push notifications';
@@ -162,7 +162,7 @@
             }
 
             // Keep your server in sync with the latest endpoint
-            return that.push_sendSubscriptionToServer(subscription, 'PUT', data);
+            return that.push_sendSubscriptionToServer(subscription, 'PUT');
           })
           .then(subscription => subscription && that.updateWebpushState('enabled')) // Set your UI to show they have subscribed for push messages
           .catch(e => {
@@ -222,7 +222,7 @@
 
             // We have a subscription, unsubscribe
             // Remove push subscription from server
-            return that.push_sendSubscriptionToServer(subscription, 'DELETE', data);
+            return that.push_sendSubscriptionToServer(subscription, 'DELETE');
           })
           .then(subscription => subscription.unsubscribe())
           .then(() => that.updateWebpushState('disabled'))

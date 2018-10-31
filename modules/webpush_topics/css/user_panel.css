@@ -11,14 +11,16 @@
   background-image: url('../../../images/bell-black.png');
   cursor: pointer;
 
+  outline: 1px solid red;
 }
 
 #webpush-topics-toggle {
-
+  outline: 1px solid blue;
 }
 
 #webpush-topics-panel {
   display: none;
+  outline: 1px solid green;
 }
 
 #webpush-topics-user-panel-wrapper:hover #webpush-topics-panel {

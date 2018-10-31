@@ -28,16 +28,16 @@ function webpush_topics_block_view($delta = '') {
           'css' => [
             drupal_get_path('module', 'webpush_topics') . '/css/user_panel.css',
           ],
-//          'js' => [
-//            [
-//              'type' => 'setting',
-//              'data' => ['webpush' => ['simple_button_id' => 'webpush-simple-sub-button']],
-//            ],
-//            [
-//              'data' => drupal_get_path('module', 'webpush') . '/js/simple_button.js',
-//              'type' => 'file',
-//            ],
-//          ],
+          'js' => [
+            [
+              'type' => 'setting',
+              'data' => ['webpush' => ['topics_button_id' => 'webpush-topics-subscribe']],
+            ],
+            [
+              'data' => drupal_get_path('module', 'webpush_topics') . '/js/user_panel.js',
+              'type' => 'file',
+            ],
+          ],
         ],
 
       ];

@@ -217,11 +217,12 @@ function webpush_subscription_registration_callback() {
     'publicKey' => $subscription_input['publicKey'],
     'contentEncoding' => $subscription_input['contentEncoding'],
   ]);
+  $data = $subscription_input['data'] ?? FALSE;
 
   switch ($_SERVER['REQUEST_METHOD']) {
     case 'POST':
     case 'PUT':
-      webpush_register($subscription);
+      webpush_register($subscription, $data);
       break;
 
     case 'DELETE':
@@ -239,17 +240,18 @@ function webpush_subscription_registration_callback() {
 /**
  * Callback function for registering a new subscription.
  *
- * @TODO we need to make it extendable
- *
  * @param \Minishlink\WebPush\Subscription $subscription
  *
- * @param $options
+ * @param $data
  *
  * @throws \Exception
  */
-function webpush_register(Minishlink\WebPush\Subscription $subscription, $options = []) {
+function webpush_register(Minishlink\WebPush\Subscription $subscription, $data = FALSE) {
   if (!webpush_register__retrieve_entity($subscription)) {
     webpush_register__create_entity($subscription);
+  }
+  else {
+    // @TODO implement update!!
   }
 }
 
