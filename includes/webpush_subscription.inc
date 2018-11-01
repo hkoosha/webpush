@@ -58,6 +58,7 @@ function _webpush_subscription_entity_property_info() {
     'description' => t('The serialized subscription object (\Minishlink\WebPush\Subscription)'),
     'type' => 'text',
     'schema field' => 'subscription',
+    'setter callback' => 'entity_property_verbatim_set',
   ];
   $info['webpush_subscription']['properties']['created'] = [
     'label' => t('Created'),
