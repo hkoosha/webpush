@@ -2,6 +2,9 @@
   Drupal.behaviors.webPushUserPanel = {
     attach: function (context, settings) {
 
+      // Initialize
+      this.app = Drupal.behaviors.webPushApp;
+
       this.initializeCheckboxes();
 
       const buttonID = Drupal.settings.webpush.topics_button_id;
@@ -13,7 +16,6 @@
       // Handle the click event.
       $button.once('webpush-subscription-click', function () {
         $(this).click(function () {
-          const $button = $(this);
           const $checked = document.querySelectorAll('input.webpush-topics');
           const topics = [...$checked].map(i => { return i.checked ? i.value : false; }).filter(i => i !== false);
           // @TODO: This is wrong! First click unsubs, and second subs.
@@ -32,6 +34,18 @@
     app: Drupal.behaviors.webPushApp,
 
     initializeCheckboxes: function () {
+
+      // Precheck the checkboxes
+      const localStoredTopics = this.app.getLocalData('webpush_topics');
+      if (localStoredTopics) {
+        for (let i = 0, len = localStoredTopics.length; i < len; i++) {
+          let tid = localStoredTopics[i];
+          let name = 'webpush-topic-' + tid;
+          let $chk = $('input[type="checkbox"][name="' + name + '"]');
+          $chk.prop("checked", true);
+        }
+      }
+
       const $panel = $('#webpush-topics-panel');
       const $checkboxAll = $panel.find('input[name="webpush-topic-all"]');
       const $checkboxes = $panel.find('input[type="checkbox"]').not('[name="webpush-topic-all"]');

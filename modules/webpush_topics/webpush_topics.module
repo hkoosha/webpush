@@ -93,9 +93,47 @@ function webpush_topics_theme($existing, $type, $theme, $path) {
  * @param $data
  */
 function webpush_topics_webpush_create_subscription_alter(&$data) {
+  _webpush_topics_handle_all_topics($data);
+}
+
+/**
+ * Alter the incoming data.
+ *
+ * If 'webpush_topics' has the "all" value selected, we unset this value, to
+ * indicate that this subscription should cover all topics (even the ones that
+ * will be created in the future!)
+ *
+ * @param $data
+ */
+function webpush_topics_webpush_update_subscription_alter(&$data) {
+  _webpush_topics_handle_all_topics($data);
+}
+
+function _webpush_topics_handle_all_topics(&$data) {
   if (isset($data['webpush_topics'])) {
     if (in_array('all', $data['webpush_topics'])) {
       unset($data['webpush_topics']);
     }
+  }
+}
+
+function webpush_topics_webpush_return_subscription_data_alter(&$return_data, $entity) {
+  try {
+    $topics_tids = [];
+    $entity_wrapper = entity_metadata_wrapper('webpush_subscription', $entity);
+    $topics = $entity_wrapper->webpush_topics->value();
+    if (!empty($topics)) {
+      foreach ($topics as $item) {
+        $topics_tids[] = $item->tid;
+      }
+    }
+    $return_data['webpush_topics'] = $topics_tids;
+  } catch (EntityMetadataWrapperException $e) {
+    watchdog(
+      'webpush',
+      $e->getMessage() . '<br>See ' . __FUNCTION__ . '():' . __LINE__ . ' <pre>!trace</pre>',
+      ['!trace' => $e->getTraceAsString()],
+      WATCHDOG_ERROR
+    );
   }
 }

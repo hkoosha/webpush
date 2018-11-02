@@ -222,36 +222,48 @@ function webpush_subscription_registration_callback() {
     FALSE;
   $data = $subscription_input['data'] ?? FALSE;
 
+  $entity = FALSE;
   switch ($_SERVER['REQUEST_METHOD']) {
     case 'POST':
     case 'PUT':
-      webpush_register($subscription, $data);
+      $entity = webpush_register($subscription, $data);
       break;
 
     case 'DELETE':
-      webpush_delete($subscription);
+      $entity = webpush_unregister($subscription);
       break;
 
     case 'GET':
-
       if ($subscription) {
-        // @TODO return subscription stuff
-      }
-      else {
-        // @TODO return something "not found"
-        drupal_json_output(['aaa' => 'bbb']);
-        drupal_exit();
-        return;
+        $entity = webpush_register__retrieve_entity($subscription);
       }
       break;
 
-
     default:
-      // Error: method not handled.
-      return FALSE;
+      break;
   }
 
-  return TRUE;
+  if (is_object($entity)) {
+    list($id, $vid, $bundle) = entity_extract_ids('webpush_subscription', $entity);
+
+    $return_data = [];
+    // Give an opportunity to other modules to alter the outgoing data before we
+    // json serialize them.
+    drupal_alter('webpush_return_subscription_data', $return_data, $entity);
+
+    drupal_json_output([
+      'webpush' => [
+        'entity_id' => $id,
+        'data' => $return_data,
+      ],
+    ]);
+    drupal_exit();
+  }
+  else {
+    drupal_json_output(FALSE);
+    drupal_exit();
+  }
+  return;
 }
 
 /**
@@ -261,16 +273,19 @@ function webpush_subscription_registration_callback() {
  *
  * @param $data
  *
- * @throws \Exception
  */
 function webpush_register(Minishlink\WebPush\Subscription $subscription, $data = FALSE) {
-  // @TODO restore conditional and implement update!!
-  //  if (!webpush_register__retrieve_entity($subscription)) {
-  webpush_register__create_entity($subscription, $data);
-  //  }
-  //  else {
-  //
-  //  }
+  $entity = webpush_register__retrieve_entity($subscription);
+  // Is there an entity hosting this subscription?
+  if ($entity) {
+    // Yes, so update it.
+    $entity = webpush_register__update_entity($subscription, $data, $entity);
+  }
+  else {
+    // No, so create one..
+    $entity = webpush_register__create_entity($subscription, $data);
+  }
+  return $entity;
 }
 
 /**
@@ -278,8 +293,42 @@ function webpush_register(Minishlink\WebPush\Subscription $subscription, $data =
  *
  * @param \Minishlink\WebPush\Subscription $subscription
  */
-function webpush_delete(Minishlink\WebPush\Subscription $subscription) {
+function webpush_unregister(Minishlink\WebPush\Subscription $subscription) {
   webpush_register__delete_entity($subscription);
+}
+
+function webpush_register__update_entity(Minishlink\WebPush\Subscription $subscription, $data = FALSE, WebpushSubscription $entity) {
+  $serialized = serialize($subscription);
+
+  try {
+    $entity_wrapper = entity_metadata_wrapper('webpush_subscription', $entity);
+    $entity_wrapper->subscription->set($serialized);
+    if (is_array($data)) {
+
+      // Give an opportunity to other modules to alter the incoming data before we
+      // assign the values to fields.
+      drupal_alter('webpush_update_subscription', $data);
+
+      // Just for safety reasons, because the drupal_alter might have unset all
+      // the fields.
+      if (!empty($data)) {
+        foreach ($data as $field => $values) {
+          $entity_wrapper->$field->set($values);
+        }
+      }
+    }
+    $entity_wrapper->save();
+  } catch (EntityMetadataWrapperException $e) {
+    watchdog(
+      'webpush',
+      $e->getMessage() . '<br>See ' . __FUNCTION__ . '():' . __LINE__ . ' <pre>!trace</pre>',
+      ['!trace' => $e->getTraceAsString()],
+      WATCHDOG_ERROR
+    );
+    return FALSE;
+  }
+
+  return $entity_wrapper->value();
 }
 
 /**
@@ -329,6 +378,7 @@ function webpush_register__create_entity(Minishlink\WebPush\Subscription $subscr
         ['!trace' => $e->getTraceAsString()],
         WATCHDOG_ERROR
       );
+      return FALSE;
     }
   }
 
@@ -366,7 +416,9 @@ function webpush_register__retrieve_entity(Minishlink\WebPush\Subscription $subs
   $result = $query->execute();
   if (isset($result['webpush_subscription'])) {
     reset($result['webpush_subscription']);
-    return key($result['webpush_subscription']);
+    $id = key($result['webpush_subscription']);
+    $entity = entity_load_single('webpush_subscription', [$id]);
+    return $entity;
   }
   return FALSE;
 }
@@ -379,7 +431,8 @@ function webpush_register__retrieve_entity(Minishlink\WebPush\Subscription $subs
  * @return bool|int|null|string
  */
 function webpush_register__delete_entity(Minishlink\WebPush\Subscription $subscription) {
-  $id = webpush_register__retrieve_entity($subscription);
+  $entity = webpush_register__retrieve_entity($subscription);
+  list($id, $vid, $bundle) = entity_extract_ids('webpush_subscription', $entity);
   entity_delete('webpush_subscription', $id);
 }
 

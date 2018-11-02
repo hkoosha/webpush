@@ -86,12 +86,13 @@
     },
 
     push_sendSubscriptionToServer: function (subscription, method, data) {
+      const that = this;
       const key = subscription.getKey('p256dh');
       const token = subscription.getKey('auth');
       const contentEncoding = (PushManager.supportedContentEncodings || ['aesgcm'])[0];
 
       let d = new Date();
-      return fetch('/webpush/subscription-registration?' + d.getTime(), {
+      const a = fetch('/webpush/subscription-registration?' + d.getTime(), {
         method,
         body: JSON.stringify({
           endpoint: subscription.endpoint,
@@ -100,7 +101,28 @@
           contentEncoding: contentEncoding,
           data: data,
         }),
-      }).then(() => subscription);
+      });
+      const b = a.then(resultA => {
+        return resultA.json()
+            .then(responseJSON => {
+              return responseJSON;
+            });
+      });
+      return Promise.all([a, b]).then(function ([response, drupalJson]) {
+        if (drupalJson !== false) {
+          const data = drupalJson.webpush.data;
+          for (let k in data) {
+            if (data.hasOwnProperty(k)) {
+              that.setLocalData(k, data[k]);
+            }
+          }
+        }
+
+        return {
+          'subscription': subscription,
+          'drupalJson': drupalJson
+        };
+      });
     },
 
     updateWebpushState: function (state) {
@@ -148,8 +170,7 @@
       }
     },
 
-
-    push_updateSubscription: function (data) {
+    push_updateSubscription: function () {
       const that = this;
       navigator.serviceWorker.ready.then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.getSubscription())
           .then(subscription => {
@@ -161,13 +182,70 @@
               return;
             }
 
-            // Keep your server in sync with the latest endpoint
-            return that.push_sendSubscriptionToServer(subscription, 'PUT');
+            /*
+              If we reached here, it means that the client has updated their
+              (already existing) subscription. This might have happened
+              because the user manually unregistered the SW, or because our SW
+              has been updated, or for other reasons (maybe browser update?
+              I'm not sure about that.)
+
+              As a result, the client has a new endpoint, a totally different
+              PushSubscription object
+              (@see https://developer.mozilla.org/en-US/docs/Web/API/PushSubscription)
+              which is not related to the old one.
+
+              Until now, I couldn't find any way to relate those two
+              PushSubscription objects (if you, dear developer who reads these
+              comments, know any way, PLEASE PLEASE PLEASE open a new task in
+              the module's issue queue
+              (@see https://www.drupal.org/project/issues/webpush?status=All&categories=All)
+
+              The new endpoint must be sent to our server. We'll try to look
+              into the local storage, to see if we have any info.
+
+              If the user has also cleared his local cache, then we have no info.
+
+              @TODO maybe implement something that will ask the user
+             */
+
+            const localData = that.getAllLocalData() ? that.getAllLocalData() : {};
+            return that.push_sendSubscriptionToServer(subscription, 'PUT', localData);
           })
-          .then(subscription => subscription && that.updateWebpushState('enabled')) // Set your UI to show they have subscribed for push messages
+          .then(response => {
+            return response.subscription && that.updateWebpushState('enabled');
+          }) // Set your UI to show they have subscribed for push messages
           .catch(e => {
             console.error('Error when updating the subscription', e);
           });
+    },
+
+    getLocalData: function (key) {
+      const currentStorage = this.getAllLocalData();
+      if (currentStorage === null) {
+        return false;
+      }
+      if (key in currentStorage) {
+        return currentStorage[key];
+      }
+      else {
+        return false;
+      }
+    },
+
+    getAllLocalData: function () {
+      return JSON.parse(localStorage.getItem('webpush'));
+    },
+
+    setLocalData: function (key, value) {
+      let store = {};
+      let currentStorage = localStorage.getItem('webpush');
+      if (currentStorage !== null) {
+        // There are already stored values in our bin, we should not lose them.
+        store = JSON.parse(currentStorage);
+      }
+      store[key] = value;
+      localStorage.setItem('webpush', JSON.stringify(store));
+      return true;
     },
 
     push_subscribe: function (data) {
@@ -184,7 +262,7 @@
             // create subscription on your server
             return that.push_sendSubscriptionToServer(subscription, 'POST', data);
           })
-          .then(subscription => subscription && that.updateWebpushState('enabled')) // update your UI
+          .then(response => response.subscription && that.updateWebpushState('enabled')) // update your UI
           .catch(e => {
             if (Notification.permission === 'denied') {
               // The user denied the notification permission which
@@ -224,7 +302,7 @@
             // Remove push subscription from server
             return that.push_sendSubscriptionToServer(subscription, 'DELETE');
           })
-          .then(subscription => subscription.unsubscribe())
+          .then(response => response.subscription.unsubscribe())
           .then(() => that.updateWebpushState('disabled'))
           .catch(e => {
             // We failed to unsubscribe, this can lead to
@@ -232,10 +310,9 @@
             // the users data from your data store and
             // inform the user that you have done so
             console.error('Error when unsubscribing the user', e);
-            that.updateWebpushState('disabled', $subButton);
+            that.updateWebpushState('disabled');
           });
     },
-
 
   };
 })(jQuery, Drupal);
