@@ -33,7 +33,7 @@ function webpush_admin_send_form() {
     '#type' => 'radios',
     '#title' => t('Link type'),
     '#options' => webpush_link_type_options(),
-    '#default_value' => variable_get('webpush_link_type', 'node'),
+    '#default_value' => variable_get('webpush_link_type', 'frontpage'),
   ];
   $form['link']['link_node'] = [
     '#type' => 'textfield',
@@ -66,10 +66,9 @@ function webpush_admin_send_form() {
 
 function webpush_link_type_options() {
   return [
-    'node' => t('Node'),
     'frontpage' => t('Frontpage'),
+    'node' => t('Node'),
     'custom' => t('Custom'),
-    'none' => t('None'),
   ];
 }
 
@@ -158,12 +157,9 @@ function webpush_admin_send_form_submit($form, &$form_state) {
       $link = $values['link_custom'];
       break;
     case 'frontpage':
+    default:
       global $base_url;
       $link = $base_url;
-      break;
-    case 'none':
-    default:
-      $link = FALSE;
       break;
   }
   $notification_entity = webpush_notification__create_entity($title, $body, $link);
