@@ -8,26 +8,27 @@
   z-index: 999;
 }
 
-#webpush-simple-sub-button.working {
+#webpush-simple-sub-button[data-webpush-state="enabled"],
+#webpush-simple-sub-button[data-webpush-state="disabled"] {
   background-image: url('../images/bell-black.png');
   cursor: pointer;
 }
 
-#webpush-simple-sub-button.not-working {
+#webpush-simple-sub-button[data-webpush-state="incompatible"],
+#webpush-simple-sub-button[data-webpush-state="userdenied"],
+#webpush-simple-sub-button[data-webpush-state="computing"],
+#webpush-simple-sub-button[data-webpush-state="unknown"] {
   background-image: url('../images/bell-grey.png');
   cursor: not-allowed;
 }
 
-#webpush-subscription-message {
+#webpush-simple-sub-button:hover::after {
+  content: attr(data-webpush-message);
+  display: block;
   position: absolute;
   bottom: 100%;
   left: 0;
-  display: none;
   font-size: 12px;
   line-height: 14px;
   width: 240px;
-}
-
-#webpush-simple-sub-button:hover #webpush-subscription-message {
-  display: block;
 }

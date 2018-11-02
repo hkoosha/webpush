@@ -10,7 +10,7 @@
       if (!$button.length) {
         return;
       }
-      Drupal.behaviors.webPushApp.subButton = $button;
+      Drupal.behaviors.webPushApp.subscriptionButtons.push($button);
 
       // Handle the click event.
       $button.once('webpush-subscription-click', function () {

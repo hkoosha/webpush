@@ -10,7 +10,7 @@
       if (!$button.length) {
         return;
       }
-      Drupal.behaviors.webPushApp.subButton = $button;
+      Drupal.behaviors.webPushApp.subscriptionButtons.push($button);
 
       this.initializeCheckboxes();
 

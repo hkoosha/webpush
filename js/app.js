@@ -47,7 +47,7 @@
       return this.applicationServerKey;
     },
 
-    subButton: false,
+    subscriptionButtons: [],
 
     unsupportedFeatures: function () {
       if (!('serviceWorker' in navigator)) {
@@ -126,48 +126,41 @@
     },
 
     updateWebpushState: function (state) {
-      const $subButton = this.subButton;
-      if (!$subButton) {
-        return; // @TODO need to handle it better.
+      const $subscriptionButtons = this.subscriptionButtons;
+      if (!$subscriptionButtons.length) {
+        return; // @TODO maybe we need to handle it better.
       }
 
-      const $messageSpan = $('#webpush-subscription-message');
-
       let message = '';
-      $subButton.attr('data-webpush-state', state);
       switch (state) {
         case 'enabled':
           message = 'Disable Push notifications';
-          $messageSpan.text(message);
           this.isPushEnabled = true;
-          $subButton.addClass('working');
           break;
         case 'disabled':
           message = 'Enable Push notifications';
-          $messageSpan.text(message);
           this.isPushEnabled = false;
-          $subButton.addClass('working');
           break;
         case 'computing':
           message = 'Loading...';
-          $messageSpan.text(message);
           break;
         case 'incompatible':
           message = 'Push notifications are not compatible with this browser';
-          $messageSpan.text(message);
-          $subButton.addClass('not-working');
           break;
         case 'userdenied':
           message = 'The user has denied push notifications';
-          $messageSpan.text(message);
-          $subButton.addClass('not-working');
           break;
         default:
-          message = 'Unknown push notifications state';
-          $messageSpan.text(message);
           console.error('Unhandled push button state', state);
-          $subButton.addClass('not-working');
+          message = 'Unknown push notifications state';
+          state = 'unknown';
           break;
+      }
+
+      for (let i = 0, len = $subscriptionButtons.length; i < len; i++) {
+        let $button = $subscriptionButtons[i];
+        $button.attr('data-webpush-state', state);
+        $button.attr('data-webpush-message', message);
       }
     },
 
