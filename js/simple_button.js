@@ -15,12 +15,14 @@
       // Handle the click event.
       $button.once('webpush-subscription-click', function () {
         $(this).click(function () {
-          const $button = $(this);
-          if (Drupal.behaviors.webPushApp.isPushEnabled) {
-            Drupal.behaviors.webPushApp.push_unsubscribe({});
-          }
-          else {
-            Drupal.behaviors.webPushApp.push_subscribe({});
+          const state = $button.attr('data-webpush-state');
+          if ( state === 'enabled' || state === 'disabled' ) {
+            if (Drupal.behaviors.webPushApp.isPushEnabled) {
+              Drupal.behaviors.webPushApp.push_unsubscribe({});
+            }
+            else {
+              Drupal.behaviors.webPushApp.push_subscribe({});
+            }
           }
         });
       });

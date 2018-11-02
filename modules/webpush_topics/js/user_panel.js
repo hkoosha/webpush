@@ -20,6 +20,7 @@
           const $checked = document.querySelectorAll('input.webpush-topics');
           const topics = [...$checked].map(i => { return i.checked ? i.value : false; }).filter(i => i !== false);
           // @TODO: This is wrong! First click unsubs, and second subs.
+          // @TODO: also need to take the state into account!
           if (Drupal.behaviors.webPushApp.isPushEnabled) {
             Drupal.behaviors.webPushApp.push_unsubscribe();
           }
