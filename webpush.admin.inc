@@ -201,7 +201,7 @@ function webpush_admin_configuration_form() {
     '#type' => 'radios',
     '#title' => t('Link type'),
     '#options' => webpush_link_type_options(),
-    '#default_value' => variable_get('webpush_link_type', 'node'),
+    '#default_value' => variable_get('webpush_link_type', 'frontpage'),
   ];
   $form['default_values']['webpush_icon_fid'] = [
     '#type' => 'managed_file',
