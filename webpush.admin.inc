@@ -59,6 +59,7 @@ function webpush_admin_send_form() {
   $form['submit'] = [
     '#type' => 'submit',
     '#value' => t('Send'),
+    '#weight' => 100,
   ];
 
   return $form;

@@ -57,9 +57,11 @@ function _webpush_topics_block_variables() {
   return $variables;
 }
 
-function _webpush_topics_get_topics() {
+function _webpush_topics_get_topics($include_all = TRUE) {
   $topics = [];
-  $topics['all'] = t('All');
+  if ($include_all) {
+    $topics['all'] = t('All');
+  }
   $vocabulary = taxonomy_vocabulary_machine_name_load('webpush_topics');
   $terms = entity_load('taxonomy_term', FALSE, ['vid' => $vocabulary->vid]);
   foreach ($terms as $tid => $term) {
@@ -136,4 +138,33 @@ function webpush_topics_webpush_return_subscription_data_alter(&$return_data, $e
       WATCHDOG_ERROR
     );
   }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function webpush_topics_form_webpush_admin_send_form_alter(&$form, &$form_state, $form_id) {
+  $topics = _webpush_topics_get_topics($include_all = FALSE);
+  $form['topics_wrapper'] = [
+    '#type' => 'fieldset',
+    '#title' => t('Topics'),
+    '#descriptions' => t('Choose which topics subscribers should receive your notification.'),
+  ];
+  $form['topics_wrapper']['which_topics'] = [
+    '#type' => 'radios',
+    '#options' => [
+      'all' => t('All'),
+      'select' => t('Select topics'),
+    ],
+    '#default_value' => 'select',
+  ];
+  $form['topics_wrapper']['topics'] = [
+    '#type' => 'checkboxes',
+    '#title' => t('Topics'),
+    '#options' => $topics,
+    '#states' => [
+      'invisible' => [':input[name="which_topics"]' => ['value' => 'all']],
+      'disabled' => [':input[name="which_topics"]' => ['value' => 'all']],
+    ],
+  ];
 }
