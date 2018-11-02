@@ -130,6 +130,7 @@
       if (!$subButton) {
         return; // @TODO need to handle it better.
       }
+
       const $messageSpan = $('#webpush-subscription-message');
 
       let message = '';
@@ -186,8 +187,7 @@
               If we reached here, it means that the client has updated their
               (already existing) subscription. This might have happened
               because the user manually unregistered the SW, or because our SW
-              has been updated, or for other reasons (maybe browser update?
-              I'm not sure about that.)
+              has been updated, or for other reasons.
 
               As a result, the client has a new endpoint, a totally different
               PushSubscription object
@@ -212,7 +212,7 @@
             return that.push_sendSubscriptionToServer(subscription, 'PUT', localData);
           })
           .then(response => {
-            return response.subscription && that.updateWebpushState('enabled');
+            return (response && response.subscription) && that.updateWebpushState('enabled');
           }) // Set your UI to show they have subscribed for push messages
           .catch(e => {
             console.error('Error when updating the subscription', e);

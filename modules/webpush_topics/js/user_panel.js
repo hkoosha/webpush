@@ -4,14 +4,15 @@
 
       // Initialize
       this.app = Drupal.behaviors.webPushApp;
-
-      this.initializeCheckboxes();
-
+      // Assign the button to the app property.
       const buttonID = Drupal.settings.webpush.topics_button_id;
       const $button = $('#' + buttonID);
-
-      // Assign it to the app property.
+      if (!$button.length) {
+        return;
+      }
       Drupal.behaviors.webPushApp.subButton = $button;
+
+      this.initializeCheckboxes();
 
       // Handle the click event.
       $button.once('webpush-subscription-click', function () {

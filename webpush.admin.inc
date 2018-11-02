@@ -166,8 +166,6 @@ function webpush_admin_send_form_submit($form, &$form_state) {
       $link = FALSE;
       break;
   }
-  dsm($values, 'values');
-
   $notification_entity = webpush_notification__create_entity($title, $body, $link);
 
   batch_set(webpush__send_notification_batch($notification_entity));
@@ -179,7 +177,7 @@ function webpush_admin_configuration_form() {
   $form['app_keys'] = [
     '#type' => 'fieldset',
     '#title' => t('App keys'),
-    '#description' => t('App keys'),
+    '#description' => t('You can use this site to create your app keys:') . ' <a href="https://web-push-codelab.glitch.me/">https://web-push-codelab.glitch.me</a>',
     '#collapsible' => TRUE,
     '#collapsed' => webpush_is_enabled(),
   ];

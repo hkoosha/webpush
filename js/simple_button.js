@@ -2,10 +2,14 @@
   Drupal.behaviors.webPushSimpleButton = {
     attach: function (context, settings) {
 
+      // Initialize
+      this.app = Drupal.behaviors.webPushApp;
+      // Assign the button to the app property.
       const buttonID = Drupal.settings.webpush.simple_button_id;
       const $button = $('#' + buttonID);
-
-      // Assign it to the app property.
+      if (!$button.length) {
+        return;
+      }
       Drupal.behaviors.webPushApp.subButton = $button;
 
       // Handle the click event.
