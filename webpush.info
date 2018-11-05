@@ -8,3 +8,5 @@ dependencies[] = entityreference
 
 files[] = includes/webpush_subscription.inc
 files[] = includes/webpush_notification.inc
+
+stylesheets[all][] = css/notify_user.css

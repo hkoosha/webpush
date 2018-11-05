@@ -8,6 +8,9 @@
         return;
       }
 
+      // Initialize the available properties.
+      this.initializeProperties();
+
       // Initialize variable.
       this.isPushEnabled = false;
 
@@ -48,6 +51,13 @@
     },
 
     subscriptionButtons: [],
+
+    properties: [],
+
+    initializeProperties: function () {
+      this.properties = ('webpush' in Drupal.settings) ? Drupal.settings.webpush.properties : false;
+      return this.properties;
+    },
 
     unsupportedFeatures: function () {
       if (!('serviceWorker' in navigator)) {
@@ -165,6 +175,7 @@
     },
 
     push_updateSubscription: function () {
+
       const that = this;
       navigator.serviceWorker.ready.then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.getSubscription())
           .then(subscription => {
@@ -191,17 +202,26 @@
               PushSubscription objects (if you, dear developer who reads these
               comments, know any way, PLEASE PLEASE PLEASE open a new task in
               the module's issue queue
-              (@see https://www.drupal.org/project/issues/webpush?status=All&categories=All)
+              (@see https://www.drupal.org/project/issues/webpush)
 
               The new endpoint must be sent to our server. We'll try to look
               into the local storage, to see if we have any info.
 
               If the user has also cleared his local cache, then we have no info.
-
-              @TODO maybe implement something that will ask the user
              */
 
-            const localData = that.getAllLocalData() ? that.getAllLocalData() : {};
+            let localData = {};
+            const properties = that.properties;
+            for (let i in properties) {
+              let localValue = that.getLocalData(properties[i]);
+              if (localValue === null) {
+                that.notifyUser();
+                return;
+              }
+              else {
+                localData[properties[i]] = localValue;
+              }
+            }
             return that.push_sendSubscriptionToServer(subscription, 'PUT', localData);
           })
           .then(response => {
@@ -212,16 +232,24 @@
           });
     },
 
+    notifyUser: function () {
+      const notifyUserMessage = Drupal.t('You have been unsubscribed from push notifications because you cleared your local cache.',
+          {}, {context: "webpush"});
+      const $notifyUserMessage = $('<div class="webpush-notify-user"/>')
+          .html(notifyUserMessage)
+          .appendTo('body');
+    },
+
     getLocalData: function (key) {
       const currentStorage = this.getAllLocalData();
       if (currentStorage === null) {
-        return false;
+        return null;
       }
       if (key in currentStorage) {
         return currentStorage[key];
       }
       else {
-        return false;
+        return null;
       }
     },
 

@@ -12,7 +12,6 @@
  *
  * - Notification entity: store total and successfull deliveries
  *
- * - SOS: Handle multiple buttons at the same page
  *
  * - At least one topic should exist
  */
@@ -146,10 +145,15 @@ function webpush_preprocess_html(&$variables) {
     return;
   }
 
+  // Let js know about all the active properties.
+  drupal_add_js(['webpush' => ['properties' => webpush_get_properties()]], ['type' => 'setting']);
+
   // Load the app script.
   drupal_add_js(drupal_get_path('module', 'webpush') . '/js/app.js', 'file');
+
   // Load the service worker.
   drupal_add_js(['webpush' => ['path' => url('/webpush/serviceworker/js')]], 'setting');
+
   // Send the public key to js.
   drupal_add_js(['webpush' => ['applicationServerKey' => variable_get('webpush_public_key', FALSE)]], ['type' => 'setting']);
 }
@@ -209,6 +213,16 @@ function _webpush_block_build() {
 
   ];
   return $block;
+}
+
+function webpush_get_properties() {
+  $result = [];
+  foreach (module_implements('webpush_properties_info') as $module) {
+    // Calling all modules implementing hook_hook_name and
+    // Returning results than pushing them into the $result array:
+    $result += module_invoke($module, 'webpush_properties_info');
+  }
+  return $result;
 }
 
 function webpush_subscription_registration_callback() {

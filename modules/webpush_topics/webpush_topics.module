@@ -1,5 +1,11 @@
 <?php
 
+function webpush_topics_webpush_properties_info() {
+  return [
+    'webpush_topics'
+  ];
+}
+
 /**
  * Implements hook_block_info().
  */
