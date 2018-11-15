@@ -193,7 +193,7 @@ function _webpush_block_build() {
   $block = [
     'message' => [
       '#type' => 'markup',
-      '#markup' => '<div id="webpush-simple-sub-button"><span id="webpush-subscription-message"></span></div>',
+      '#markup' => '<div id="webpush-simple-sub-button"></div>',
       '#suffix' => '',
     ],
 

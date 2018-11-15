@@ -4,15 +4,17 @@
 
     <div id="webpush-topics-panel">
       <?php
-        foreach ($topics as $tid => $topic):
-       ?>
-          <label><input type="checkbox" class="webpush-topics" name="webpush-topic-<?php print $tid; ?>" value="<?php print $tid; ?>"><?php print $topic; ?></label>
+      foreach ($topics as $tid => $topic):
+        ?>
+          <label><input type="checkbox" class="webpush-topics" name="webpush-topic-<?php print $tid; ?>" value="<?php print $tid; ?>"><?php print $topic; ?>
+          </label>
       <?php
-        endforeach;
+      endforeach;
       ?>
-          <button id="webpush-topics-subscribe"><?php print t('Save'); ?></button>
+        <button id="webpush-topics-subscribe"><?php print t('Save'); ?></button>
 
-          <span id="webpush-subscription-message"></span>
+        <button id="webpush-topics-unsubscribe"><?php print t('Disable'); ?></button>
+
     </div>
 
 </div>
