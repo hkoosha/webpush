@@ -10,22 +10,25 @@
       if (!$button.length) {
         return;
       }
-      // Drupal.behaviors.webPushApp.subscriptionButtons.push($button);
-
       this.initializeCheckboxes();
 
-      // Handle the click event.
+      // Handle the subscribe button click event.
       $button.once('webpush-subscription-click', function () {
         $(this).click(function () {
           const $checked = document.querySelectorAll('input.webpush-topics');
           const topics = [...$checked].map(i => { return i.checked ? i.value : false; }).filter(i => i !== false);
-          // @TODO: This is wrong! First click unsubs, and second subs.
-          // @TODO: also need to take the state into account!
+          Drupal.behaviors.webPushApp.push_subscribe({webpush_topics: topics});
+        });
+      });
+
+      // Handle the unsubscribe button click event.
+      const that = this;
+      const $buttonDisable = $('#webpush-topics-unsubscribe');
+      $buttonDisable.once('webpush-subscription-click', function () {
+        $(this).click(function () {
           if (Drupal.behaviors.webPushApp.isPushEnabled) {
             Drupal.behaviors.webPushApp.push_unsubscribe();
-          }
-          else {
-            Drupal.behaviors.webPushApp.push_subscribe({webpush_topics: topics});
+            that.uncheckEverything();
           }
         });
       });
@@ -36,17 +39,6 @@
     app: Drupal.behaviors.webPushApp,
 
     initializeCheckboxes: function () {
-
-      // Precheck the checkboxes
-      const localStoredTopics = this.app.getLocalData('webpush_topics');
-      if (localStoredTopics) {
-        for (let i = 0, len = localStoredTopics.length; i < len; i++) {
-          let tid = localStoredTopics[i];
-          let name = 'webpush-topic-' + tid;
-          let $chk = $('input[type="checkbox"][name="' + name + '"]');
-          $chk.prop("checked", true);
-        }
-      }
 
       const $panel = $('#webpush-topics-panel');
       const $checkboxAll = $panel.find('input[name="webpush-topic-all"]');
@@ -59,7 +51,34 @@
           $checkboxes.prop("checked", false).removeAttr("disabled");
         }
       });
+
+
+      // Precheck the checkboxes
+      const localStoredTopics = this.app.getLocalData('webpush_topics');
+      if (localStoredTopics !== null) {
+
+        // If there are values, precheck the relevant buttons.
+        if (localStoredTopics.length) {
+          for (let i = 0, len = localStoredTopics.length; i < len; i++) {
+            let tid = localStoredTopics[i];
+            let name = 'webpush-topic-' + tid;
+            let $chk = $('input[type="checkbox"][name="' + name + '"]');
+            $chk.prop("checked", true);
+          }
+        }
+        // If there are no values (aka empty array), then suppose that "all"
+        // had been clicked
+        else {
+          $checkboxAll.click();
+        }
+      }
     },
+
+    uncheckEverything: function () {
+      const $panel = $('#webpush-topics-panel');
+      const $checkboxes = $panel.find('input[type="checkbox"]');
+      $checkboxes.prop("checked", false).removeAttr("disabled");
+    }
 
   };
 })(jQuery, Drupal);

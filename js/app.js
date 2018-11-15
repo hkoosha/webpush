@@ -156,7 +156,7 @@
     updateWebpushState: function (state) {
       const $subscriptionButtons = this.subscriptionButtons;
       if (!$subscriptionButtons.length) {
-        return; // @TODO maybe we need to handle it better.
+        return;
       }
 
       let message = '';
@@ -287,6 +287,10 @@
       return true;
     },
 
+    clearLocalData: function () {
+      localStorage.removeItem('webpush');
+    },
+
     push_subscribe: function (data) {
       const that = this;
       this.updateWebpushState('computing');
@@ -342,6 +346,7 @@
             return that.push_sendSubscriptionToServer(subscription, 'DELETE');
           })
           .then(response => response.subscription.unsubscribe())
+          .then(() => that.clearLocalData())
           .then(() => that.updateWebpushState('disabled'))
           .catch(e => {
             // We failed to unsubscribe, this can lead to
