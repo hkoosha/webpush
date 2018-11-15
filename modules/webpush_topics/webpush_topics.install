@@ -27,6 +27,12 @@ function _webpush_topics_create_taxonomy_vocabulary() {
   $new_vocab->description = 'Categorization topics for your push notifications.';
   $new_vocab->machine_name = 'webpush_topics';
   taxonomy_vocabulary_save($new_vocab);
+
+  $new_term = new stdClass();
+  $new_term->name = 'Sample topic';
+  $new_term->description = 'Example topic for your push notifications.';
+  $new_term->vid = $new_vocab->vid;
+  taxonomy_term_save($new_term);
 }
 
 /**
@@ -47,7 +53,8 @@ function _webpush_topics_create_fields() {
     ],
     'settings' => [
       'target_type' => 'taxonomy_term',
-      'handler_settings' => ['target_bundles' => ['webpush_topics']], // @TODO this will change if dedupe
+      'handler_settings' => ['target_bundles' => ['webpush_topics']],
+      // @TODO this will change if dedupe
     ],
     'cardinality' => FIELD_CARDINALITY_UNLIMITED,
     'locked' => TRUE,
