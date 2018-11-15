@@ -1,7 +1,5 @@
 <div id="webpush-topics-user-panel-wrapper">
 
-    <div id="webpush-topics-toggle"></div>
-
     <div id="webpush-topics-panel">
       <?php
       foreach ($topics as $tid => $topic):
@@ -11,9 +9,9 @@
       <?php
       endforeach;
       ?>
-        <button id="webpush-topics-subscribe"><?php print t('Save'); ?></button>
+        <div id="webpush-topics-subscribe" class="webpush-button"><?php print t('Save'); ?></div>
 
-        <button id="webpush-topics-unsubscribe"><?php print t('Disable'); ?></button>
+        <div id="webpush-topics-unsubscribe" class="webpush-button"><?php print t('Disable'); ?></div>
 
     </div>
 

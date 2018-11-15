@@ -182,4 +182,6 @@ function webpush_topics_form_webpush_admin_send_form_alter(&$form, &$form_state,
       'disabled' => [':input[name="which_topics"]' => ['value' => 'all']],
     ],
   ];
+
+  //@TODO implement alter function for the target!!!
 }

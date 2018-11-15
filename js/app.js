@@ -3,6 +3,8 @@
 
     attach: function (context, settings) {
 
+      this.state = 'unknown';
+
       // Initialize the application server key
       if (!this.initializeApplicationServerKey()) {
         return;
@@ -154,10 +156,7 @@
     },
 
     updateWebpushState: function (state) {
-      const $subscriptionButtons = this.subscriptionButtons;
-      if (!$subscriptionButtons.length) {
-        return;
-      }
+      this.state = state;
 
       let message = '';
       switch (state) {
@@ -185,12 +184,32 @@
           break;
       }
 
+      this.stateMessage = message;
+
+      // And now update the buttons.
+      const $subscriptionButtons = this.subscriptionButtons;
+      if (!$subscriptionButtons.length) {
+        return;
+      }
+
       for (let i = 0, len = $subscriptionButtons.length; i < len; i++) {
         let $button = $subscriptionButtons[i];
         $button.attr('data-webpush-state', state);
         $button.attr('data-webpush-message', message);
+        $button[0].dispatchEvent(new CustomEvent("webpush-state-update", {
+              detail: {
+                state: state,
+                message: message
+              }
+            })
+        );
+
       }
     },
+
+    state: 'unknown',
+
+    stateMessage: '',
 
     push_updateSubscription: function () {
 

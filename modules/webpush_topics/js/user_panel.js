@@ -2,6 +2,8 @@
   Drupal.behaviors.webPushUserPanel = {
     attach: function (context, settings) {
 
+      const that = this;
+
       // Initialize
       this.app = Drupal.behaviors.webPushApp;
       // Assign the button to the app property.
@@ -11,6 +13,10 @@
         return;
       }
       this.initializeCheckboxes();
+
+      $button[0].addEventListener("webpush-state-update", function(event) {
+        that.handleStateUpdate(event.detail.state, event.detail.message);
+      });
 
       // Handle the subscribe button click event.
       $button.once('webpush-subscription-click', function () {
@@ -22,7 +28,6 @@
       });
 
       // Handle the unsubscribe button click event.
-      const that = this;
       const $buttonDisable = $('#webpush-topics-unsubscribe');
       $buttonDisable.once('webpush-subscription-click', function () {
         $(this).click(function () {
@@ -78,7 +83,12 @@
       const $panel = $('#webpush-topics-panel');
       const $checkboxes = $panel.find('input[type="checkbox"]');
       $checkboxes.prop("checked", false).removeAttr("disabled");
-    }
+    },
 
+    handleStateUpdate: function (state, message) {
+      const $toggler = $('#webpush-topics-user-panel-wrapper');
+      $toggler.attr('data-webpush-state', state);
+      $toggler.attr('data-webpush-message', message);
+    }
   };
 })(jQuery, Drupal);
