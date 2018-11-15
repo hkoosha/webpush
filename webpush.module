@@ -148,6 +148,9 @@ function webpush_preprocess_html(&$variables) {
   // Let js know about all the active properties.
   drupal_add_js(['webpush' => ['properties' => webpush_get_properties()]], ['type' => 'setting']);
 
+  // Let js know about all the active buttons.
+  drupal_add_js(['webpush' => ['buttons' => webpush_get_buttons()]], ['type' => 'setting']);
+
   // Load the app script.
   drupal_add_js(drupal_get_path('module', 'webpush') . '/js/app.js', 'file');
 
@@ -200,10 +203,10 @@ function _webpush_block_build() {
       ],
 
       'js' => [
-        [
-          'type' => 'setting',
-          'data' => ['webpush' => ['simple_button_id' => 'webpush-simple-sub-button']],
-        ],
+//        [
+//          'type' => 'setting',
+//          'data' => ['webpush' => ['simple_button_id' => 'webpush-simple-sub-button']],
+//        ],
         [
           'data' => drupal_get_path('module', 'webpush') . '/js/simple_button.js',
           'type' => 'file',
@@ -218,12 +221,27 @@ function _webpush_block_build() {
 function webpush_get_properties() {
   $result = [];
   foreach (module_implements('webpush_properties_info') as $module) {
-    // Calling all modules implementing hook_hook_name and
-    // Returning results than pushing them into the $result array:
-    $result += module_invoke($module, 'webpush_properties_info');
+    $module_result = module_invoke($module, 'webpush_properties_info');
+    $result = array_merge($result, $module_result);
   }
   return $result;
 }
+
+function webpush_get_buttons() {
+  $result = [];
+  foreach (module_implements('webpush_buttons_info') as $module) {
+    $module_result = module_invoke($module, 'webpush_buttons_info');
+    $result = array_merge($result, $module_result);
+  }
+  return $result;
+}
+
+function webpush_webpush_buttons_info() {
+  return [
+    'simple_button_id' => 'webpush-simple-sub-button'
+  ];
+}
+
 
 function webpush_subscription_registration_callback() {
   $subscription_input = json_decode(file_get_contents('php://input'), TRUE);

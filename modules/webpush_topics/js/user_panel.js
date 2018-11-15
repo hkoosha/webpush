@@ -5,12 +5,12 @@
       // Initialize
       this.app = Drupal.behaviors.webPushApp;
       // Assign the button to the app property.
-      const buttonID = Drupal.settings.webpush.topics_button_id;
+      const buttonID = Drupal.settings.webpush.buttons.topics_button_id;
       const $button = $('#' + buttonID);
       if (!$button.length) {
         return;
       }
-      Drupal.behaviors.webPushApp.subscriptionButtons.push($button);
+      // Drupal.behaviors.webPushApp.subscriptionButtons.push($button);
 
       this.initializeCheckboxes();
 

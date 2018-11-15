@@ -11,6 +11,9 @@
       // Initialize the available properties.
       this.initializeProperties();
 
+      // Initialize the available subscription buttons.
+      this.initializeSubscriptionButtons();
+
       // Initialize variable.
       this.isPushEnabled = false;
 
@@ -51,6 +54,21 @@
     },
 
     subscriptionButtons: [],
+
+    initializeSubscriptionButtons: function () {
+      const availableButtons = ('webpush' in Drupal.settings) ? Drupal.settings.webpush.buttons : false;
+      if (availableButtons) {
+        for (let k in availableButtons) {
+          if (availableButtons.hasOwnProperty(k)) {
+            let $button = $('#' + availableButtons[k]);
+            if ($button.length) { // Make sure that the button is actually on the page.
+              this.subscriptionButtons.push($button);
+            }
+          }
+        }
+      }
+      return this.subscriptionButtons;
+    },
 
     properties: [],
 

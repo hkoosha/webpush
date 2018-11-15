@@ -6,6 +6,12 @@ function webpush_topics_webpush_properties_info() {
   ];
 }
 
+function webpush_topics_webpush_buttons_info() {
+  return [
+    'topics_button_id' => 'webpush-topics-subscribe'
+  ];
+}
+
 /**
  * Implements hook_block_info().
  */
@@ -35,10 +41,10 @@ function webpush_topics_block_view($delta = '') {
             drupal_get_path('module', 'webpush_topics') . '/css/user_panel.css',
           ],
           'js' => [
-            [
-              'type' => 'setting',
-              'data' => ['webpush' => ['topics_button_id' => 'webpush-topics-subscribe']],
-            ],
+//            [
+//              'type' => 'setting',
+//              'data' => ['webpush' => ['topics_button_id' => 'webpush-topics-subscribe']],
+//            ],
             [
               'data' => drupal_get_path('module', 'webpush_topics') . '/js/user_panel.js',
               'type' => 'file',
@@ -121,6 +127,9 @@ function _webpush_topics_handle_all_topics(&$data) {
   if (isset($data['webpush_topics'])) {
     if (in_array('all', $data['webpush_topics'])) {
       unset($data['webpush_topics']);
+    }
+    else {
+      // @TODO iterate through all the topics, to confirm that there is indeed such a term.
     }
   }
 }

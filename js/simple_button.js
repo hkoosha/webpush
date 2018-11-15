@@ -5,12 +5,11 @@
       // Initialize
       this.app = Drupal.behaviors.webPushApp;
       // Assign the button to the app property.
-      const buttonID = Drupal.settings.webpush.simple_button_id;
+      const buttonID = Drupal.settings.webpush.buttons.simple_button_id;
       const $button = $('#' + buttonID);
       if (!$button.length) {
-        return;
+        return; // Just in case...
       }
-      Drupal.behaviors.webPushApp.subscriptionButtons.push($button);
 
       // Handle the click event.
       $button.once('webpush-subscription-click', function () {
