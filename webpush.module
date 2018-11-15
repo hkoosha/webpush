@@ -96,7 +96,7 @@ function webpush_menu() {
 
   // Items related to WebPush Notification entity.
   $items['admin/structure/webpush-notification/manage'] = [
-    'title' => 'WebPush notifiations',
+    'title' => 'WebPush notifications',
     'page callback' => 'webpush_notification__overview',
     'file' => 'includes/webpush_notification.inc',
     'access arguments' => ['administer webpush'],
