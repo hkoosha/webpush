@@ -19,7 +19,10 @@ $handler->display->display_options['cache']['type'] = 'none';
 $handler->display->display_options['query']['type'] = 'views_query';
 $handler->display->display_options['exposed_form']['type'] = 'basic';
 $handler->display->display_options['pager']['type'] = 'full';
-$handler->display->display_options['pager']['options']['items_per_page'] = '50';
+$handler->display->display_options['pager']['options']['items_per_page'] = '20';
+$handler->display->display_options['pager']['options']['offset'] = '0';
+$handler->display->display_options['pager']['options']['id'] = '0';
+$handler->display->display_options['pager']['options']['quantity'] = '9';
 $handler->display->display_options['style_plugin'] = 'table';
 /* Field: WebPush notification: ID */
 $handler->display->display_options['fields']['id']['id'] = 'id';
@@ -45,6 +48,16 @@ $handler->display->display_options['fields']['body']['field'] = 'body';
 $handler->display->display_options['fields']['link']['id'] = 'link';
 $handler->display->display_options['fields']['link']['table'] = 'webpush_notification';
 $handler->display->display_options['fields']['link']['field'] = 'link';
+/* Field: WebPush notification: Total */
+$handler->display->display_options['fields']['total']['id'] = 'total';
+$handler->display->display_options['fields']['total']['table'] = 'webpush_notification';
+$handler->display->display_options['fields']['total']['field'] = 'total';
+$handler->display->display_options['fields']['total']['separator'] = '';
+/* Field: WebPush notification: Success */
+$handler->display->display_options['fields']['success']['id'] = 'success';
+$handler->display->display_options['fields']['success']['table'] = 'webpush_notification';
+$handler->display->display_options['fields']['success']['field'] = 'success';
+$handler->display->display_options['fields']['success']['separator'] = '';
 /* Sort criterion: WebPush notification: Created */
 $handler->display->display_options['sorts']['created']['id'] = 'created';
 $handler->display->display_options['sorts']['created']['table'] = 'webpush_notification';
@@ -72,6 +85,8 @@ $translatables['webpush_notifications'] = array(
   t('Title'),
   t('Body'),
   t('Link'),
+  t('Total'),
+  t('Success'),
 );
 
 return $view;
