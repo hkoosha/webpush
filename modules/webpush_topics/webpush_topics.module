@@ -129,9 +129,25 @@ function _webpush_topics_handle_all_topics(&$data) {
       unset($data['webpush_topics']);
     }
     else {
-      // @TODO iterate through all the topics, to confirm that there is indeed such a term.
+      // Make sure that these topics actually exist.
+      $tids = webpush_topics_get_topics_tids();
+      foreach ($data['webpush_topics'] as $i => $tid) {
+        if (!in_array($tid, $tids)) {
+          unset($data['webpush_topics'][$i]);
+        }
+      }
     }
   }
+}
+
+function webpush_topics_get_topics_tids() {
+  $tids = [];
+  $vid = taxonomy_vocabulary_machine_name_load('webpush_topics')->vid;
+  $topics_tree = taxonomy_get_tree($vid);
+  foreach ($topics_tree as $item) {
+    $tids[] = $item->tid;
+  }
+  return $tids;
 }
 
 function webpush_topics_webpush_return_subscription_data_alter(&$return_data, $entity) {

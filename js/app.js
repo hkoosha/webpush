@@ -146,6 +146,12 @@
               that.setLocalData(k, data[k]);
             }
           }
+          if (drupalJson.webpush.entity_id !== undefined) {
+            that.setLocalData('entity_id', drupalJson.webpush.entity_id);
+          }
+          else {
+            that.setLocalData('entity_id', false);
+          }
         }
 
         return {
@@ -259,6 +265,12 @@
                 localData[properties[i]] = localValue;
               }
             }
+
+            const entity_id = that.getLocalData('entity_id');
+            if (entity_id) {
+              localData['entity_id'] = entity_id;
+            }
+
             return that.push_sendSubscriptionToServer(subscription, 'PUT', localData);
           })
           .then(response => {

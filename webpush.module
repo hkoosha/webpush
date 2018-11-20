@@ -308,11 +308,20 @@ function webpush_subscription_registration_callback() {
  *
  */
 function webpush_register(Minishlink\WebPush\Subscription $subscription, $data = FALSE) {
-  $entity = webpush_register__retrieve_entity($subscription);
+
+  if ($data && !empty($data['entity_id'])) {
+    $incoming_entity_id = $data['entity_id'];
+    $entity = entity_load_single('webpush_subscription', [$incoming_entity_id]);
+    unset($data['entity_id']);
+  }
+  else {
+    $entity = webpush_register__retrieve_entity($subscription);
+  }
+
   // Is there an entity hosting this subscription?
   if ($entity) {
     // Yes, so update it.
-    $entity = webpush_register__update_entity($subscription, $data, $entity);
+    $entity = webpush_register__update_entity($subscription, $entity, $data);
   }
   else {
     // No, so create one..
@@ -330,7 +339,7 @@ function webpush_unregister(Minishlink\WebPush\Subscription $subscription) {
   webpush_register__delete_entity($subscription);
 }
 
-function webpush_register__update_entity(Minishlink\WebPush\Subscription $subscription, $data = FALSE, WebpushSubscription $entity) {
+function webpush_register__update_entity(Minishlink\WebPush\Subscription $subscription, WebpushSubscription $entity, $data = FALSE) {
   $serialized = serialize($subscription);
 
   try {
