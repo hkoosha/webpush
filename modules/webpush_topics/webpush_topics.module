@@ -205,7 +205,6 @@ function webpush_topics_form_webpush_admin_send_form_alter(&$form, &$form_state,
 
   // Append custom validation callback.
   $form['#validate'][] = 'webpush_topics_admin_send_form_validate';
-  //@TODO implement alter function for the target!!!
 
   // Prepend custom submit callback, to add the selected topics.
   array_unshift($form['#submit'], 'webpush_topics_admin_send_form_presubmit');
@@ -279,6 +278,13 @@ function webpush_topics__get_subscription_entities_without_topics() {
  */
 function webpush_topics_menu_alter(&$items) {
   $items['admin/structure/webpush-notification/manage']['page callback'] = 'webpush_topics_notification__overview';
+  $items['admin/structure/webpush-subscription/manage']['page callback'] = 'webpush_topics_subscription__overview';
+}
+
+function webpush_topics_views_api() {
+  return [
+    'api' => 3,
+  ];
 }
 
 function webpush_topics_notification__overview() {
@@ -288,8 +294,28 @@ function webpush_topics_notification__overview() {
   return $content;
 }
 
-function webpush_topics_views_api() {
-  return [
-    'api' => 3,
+function webpush_topics_subscription__overview() {
+  $count = webpush_subscription__count();
+  $content[] = [
+    '#prefix' => '<div>',
+    '#markup' => t('You have <strong>!number</strong> push notification subscription(s):', ['!number' => $count]),
+    '#suffix' => '<br><br></div><ul>',
   ];
+
+  $topics = _webpush_topics_get_topics($include_all = FALSE);
+  foreach ($topics as $topic_tid => $topic_label) {
+    $content[] = [
+      '#prefix' => '<li>',
+      '#markup' => t('<em>!topic:</em> <strong>!count</strong> subscription(s).', ['!topic' => $topic_label, '!count' => count(webpush_topics__get_subscription_entities_filtered([$topic_tid]))]),
+      '#suffix' => '</li>',
+    ];
+  }
+
+  $content[] = [
+    '#prefix' => '<li>',
+    '#markup' => t('<em>All topics:</em> <strong>!count</strong> subscription(s).', ['!count' => count(webpush_topics__get_subscription_entities_without_topics())]),
+    '#suffix' => '</li></ul>',
+  ];
+  
+  return $content;
 }
