@@ -93,6 +93,19 @@ function webpush_schema() {
         'size' => 'normal',
         'not null' => FALSE,
       ],
+      'total' => [
+        'description' => 'The number of subscriptions that this notification was attempted to be sent to.',
+        'type' => 'int',
+        'not null' => FALSE,
+        'default' => 0,
+      ],
+      'success' => [
+        'description' => 'The number of subscriptions that this notification was successfully sent to.',
+        'type' => 'int',
+        'not null' => FALSE,
+        'default' => 0,
+      ],
+
     ],
 
     'unique keys' => [
