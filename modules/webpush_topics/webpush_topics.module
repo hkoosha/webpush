@@ -175,6 +175,10 @@ function webpush_topics_webpush_return_subscription_data_alter(&$return_data, $e
  * Implements hook_form_alter().
  */
 function webpush_topics_form_webpush_admin_send_form_alter(&$form, &$form_state, $form_id) {
+  if (!webpush_subscription__count()) {
+    return;
+  }
+
   $topics = _webpush_topics_get_topics($include_all = FALSE);
   $form['topics_wrapper'] = [
     '#type' => 'fieldset',
