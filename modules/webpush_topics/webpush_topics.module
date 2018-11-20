@@ -181,7 +181,7 @@ function webpush_topics_form_webpush_admin_send_form_alter(&$form, &$form_state,
     '#title' => t('Topics'),
     '#descriptions' => t('Choose which topics subscribers should receive your notification.'),
   ];
-  $form['topics_wrapper']['which_topics'] = [
+  $form['topics_wrapper']['topics_mode'] = [
     '#type' => 'radios',
     '#options' => [
       'all' => t('All'),
@@ -194,10 +194,25 @@ function webpush_topics_form_webpush_admin_send_form_alter(&$form, &$form_state,
     '#title' => t('Topics'),
     '#options' => $topics,
     '#states' => [
-      'invisible' => [':input[name="which_topics"]' => ['value' => 'all']],
-      'disabled' => [':input[name="which_topics"]' => ['value' => 'all']],
+      'invisible' => [':input[name="topics_mode"]' => ['value' => 'all']],
+      'disabled' => [':input[name="topics_mode"]' => ['value' => 'all']],
     ],
   ];
 
+  // Append custom validation callback.
+  $form['#validate'][] = 'webpush_topics_admin_send_form_validate';
   //@TODO implement alter function for the target!!!
+}
+
+function webpush_topics_admin_send_form_validate(&$form, &$form_state) {
+  $values = $form_state['values'];
+
+  $topics_mode = $values['topics_mode'];
+  if ($topics_mode === 'select') {
+    $selected_topics = $form_state["values"]["topics"];
+    if (empty(array_filter($selected_topics))) {
+      form_error($form['topics_wrapper']['topics_mode'], t('You have to select at least one topic.'));
+      return FALSE;
+    }
+  }
 }
