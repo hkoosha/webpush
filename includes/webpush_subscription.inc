@@ -80,7 +80,7 @@ function _webpush_subscription_entity_property_info() {
 function webpush_subscription__overview() {
   $count = webpush_subscription__count();
   $content[] = [
-    '#markup' => t('You have !number push notification subscriptions.', ['!number' => $count]),
+    '#markup' => t('You have !number push notification subscription(s).', ['!number' => $count]),
   ];
   return $content;
 }
