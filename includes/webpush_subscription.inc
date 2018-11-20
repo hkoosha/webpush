@@ -53,6 +53,12 @@ function _webpush_subscription_entity_info() {
 function _webpush_subscription_entity_property_info() {
   $info = [];
 
+  $info['webpush_subscription']['properties']['id'] = [
+    'label' => t('ID'),
+    'description' => t('The subscription ID.'),
+    'type' => 'integer',
+    'schema field' => 'id',
+  ];
   $info['webpush_subscription']['properties']['subscription'] = [
     'label' => t('Subscription'),
     'description' => t('The serialized subscription object (\Minishlink\WebPush\Subscription)'),
