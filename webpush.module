@@ -5,15 +5,11 @@
  * Things left todo:
  *
  *
- * - Implement user control panel for topics
- *    - Alter send form handler
  *
  * - Fix: notifications listing page, default view does not work
  *
- * - Notification entity: store total and successfull deliveries
+ * - Also: new view when topics
  *
- *
- * - At least one topic should exist
  */
 
 
