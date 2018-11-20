@@ -164,6 +164,13 @@ function webpush_admin_send_form_submit($form, &$form_state) {
       break;
   }
   $notification_entity = webpush_notification__create_entity($title, $body, $link);
+  if (isset($form_state['_webpush_notification_entity_fields'])) {
+    $notification_wrapper = entity_metadata_wrapper('webpush_notification', $notification_entity);
+    foreach ($form_state['_webpush_notification_entity_fields'] as $field => $field_values) {
+      $notification_wrapper->$field->set($field_values);
+    }
+    $notification_wrapper->save();
+  }
 
   $targets = [];
   if (isset($form_state['_webpush_targets'])) {

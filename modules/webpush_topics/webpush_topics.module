@@ -242,6 +242,10 @@ function webpush_topics_admin_send_form_presubmit(&$form, &$form_state) {
 
     $targets = array_merge($targets_with_topics, $targets_without_topics);
     $form_state['_webpush_targets'] = $targets;
+
+    $form_state['_webpush_notification_entity_fields'] = [
+      'webpush_topics' => $selected_topics,
+    ];
   }
 }
 
