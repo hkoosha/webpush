@@ -224,9 +224,6 @@ function webpush_topics_admin_send_form_presubmit(&$form, &$form_state) {
   $values = $form_state['values'];
   $topics_mode = $values['topics_mode'];
 
-  // _webpush_targets
-
-
   if ($topics_mode === 'select') {
     $selected_topics = array_filter($form_state["values"]["topics"]);
 
@@ -254,7 +251,7 @@ function webpush_topics__get_subscription_entities_filtered($topics) {
   if (isset($result['webpush_subscription'])) {
     return array_keys($result['webpush_subscription']);
   }
-  return FALSE;
+  return [];
 }
 
 function webpush_topics__get_subscription_entities_without_topics() {

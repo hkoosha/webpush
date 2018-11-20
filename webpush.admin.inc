@@ -166,8 +166,15 @@ function webpush_admin_send_form_submit($form, &$form_state) {
   $notification_entity = webpush_notification__create_entity($title, $body, $link);
 
   $targets = [];
-  if (!empty($form_state['_webpush_targets'])) {
-    $targets = $form_state['_webpush_targets'];
+  if (isset($form_state['_webpush_targets'])) {
+    if ($form_state['_webpush_targets']) {
+      $targets = $form_state['_webpush_targets'];
+    }
+    else {
+      $msg = t('You have no subscriptions to your selected topics.');
+      drupal_set_message($msg, 'warning');
+      return;
+    }
   }
 
   batch_set(webpush__send_notification_batch($notification_entity, $targets));

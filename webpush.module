@@ -599,7 +599,6 @@ function webpush__send_notification_batch_wrapper($subscription_id, &$data, &$co
 
 function webpush__send_notification_batch(WebpushNotification $notification_entity, array $targets) {
   $wrapper = entity_metadata_wrapper('webpush_notification', $notification_entity);
-  drupal_set_message('Sending push notification');
 
   if (empty($targets)) {
     $subscriptions = webpush_subscription__get_all();
@@ -648,14 +647,17 @@ function webpush__send_notification_batch_finished($success, $results, $operatio
     $notification_wrapper->save();
 
     drupal_set_message($msg);
-    $keep_invalid = variable_get('webpush_keep_invalid_subscriptions', FALSE);
-    if (!$keep_invalid) {
-      $invalid = t('The subscriptions of the failed notifications have been deleted.');
-      drupal_set_message($invalid);
-    }
-    else {
-      $invalid = t('The subscriptions of the failed notifications have not been deleted because your configuration indicates to keep them, but you should consider deleting them.');
-      drupal_set_message($invalid, 'warning');
+
+    if ($fail) {
+      $keep_invalid = variable_get('webpush_keep_invalid_subscriptions', FALSE);
+      if (!$keep_invalid) {
+        $invalid = t('The subscriptions of the failed notifications have been deleted.');
+        drupal_set_message($invalid);
+      }
+      else {
+        $invalid = t('The subscriptions of the failed notifications have not been deleted because your configuration indicates to keep them, but you should consider deleting them.');
+        drupal_set_message($invalid, 'warning');
+      }
     }
   }
   else {
