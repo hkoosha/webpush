@@ -262,11 +262,11 @@ function webpush_subscription_registration_callback() {
       $entity = webpush_unregister($subscription);
       break;
 
-    case 'GET':
-      if ($subscription) {
-        $entity = webpush_register__retrieve_entity($subscription);
-      }
-      break;
+//    case 'GET':
+//      if ($subscription) {
+//        $entity = webpush_register__retrieve_entity($subscription);
+//      }
+//      break;
 
     default:
       break;

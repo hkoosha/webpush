@@ -233,8 +233,8 @@
             /*
               If we reached here, it means that the client has updated their
               (already existing) subscription. This might have happened
-              because the user manually unregistered the SW, or because our SW
-              has been updated, or for other reasons.
+              because the user manually unregistered the SW, or changed the
+              configuration of his browser, or for other reasons.
 
               As a result, the client has a new endpoint, a totally different
               PushSubscription object
@@ -242,7 +242,7 @@
               which is not related to the old one.
 
               Until now, I couldn't find any way to relate those two
-              PushSubscription objects (if you, dear developer who reads these
+              PushSubscription objects; if you, dear developer who reads these
               comments, know any way, PLEASE open a new task in the module's
               issue queue
               (@see https://www.drupal.org/project/issues/webpush)
@@ -254,18 +254,27 @@
              */
 
             let localData = {};
+            // Ask the app to provide all the expected properties (for example
+            // "webpush_topics", if that module is enabled.)
             const properties = that.properties;
+            // Iterate through the expected properties
             for (let i in properties) {
               let localValue = that.getLocalData(properties[i]);
+              // If any of these is missing from the local storage...
               if (localValue === null) {
+                // ...the user must be notified, and asked to re-subscribe.
+                // Because of that, we stop here and do not do anything further.
                 that.notifyUser();
                 return;
               }
+              // ... or else, add this property to the object that will be sent
+              // to the server.
               else {
                 localData[properties[i]] = localValue;
               }
             }
 
+            // Check also if the drupal entity ID is stored locally.
             const entity_id = that.getLocalData('entity_id');
             if (entity_id) {
               localData['entity_id'] = entity_id;

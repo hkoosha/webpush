@@ -14,7 +14,7 @@
       }
       this.initializeCheckboxes();
 
-      $button[0].addEventListener("webpush-state-update", function(event) {
+      $button[0].addEventListener("webpush-state-update", function (event) {
         that.handleStateUpdate(event.detail.state, event.detail.message);
       });
 
@@ -22,7 +22,9 @@
       $button.once('webpush-subscription-click', function () {
         $(this).click(function () {
           const $checked = document.querySelectorAll('input.webpush-topics');
-          const topics = [...$checked].map(i => { return i.checked ? i.value : false; }).filter(i => i !== false);
+          const topics = [...$checked].map(i => {
+            return i.checked ? i.value : false;
+          }).filter(i => i !== false);
           Drupal.behaviors.webPushApp.push_subscribe({webpush_topics: topics});
         });
       });
@@ -44,6 +46,7 @@
     app: Drupal.behaviors.webPushApp,
 
     initializeCheckboxes: function () {
+      const that = this;
 
       const $panel = $('#webpush-topics-panel');
       const $checkboxAll = $panel.find('input[name="webpush-topic-all"]');
@@ -59,24 +62,34 @@
 
 
       // Precheck the checkboxes
-      const localStoredTopics = this.app.getLocalData('webpush_topics');
-      if (localStoredTopics !== null) {
+      navigator.serviceWorker.ready
+          .then(serviceWorkerRegistration => serviceWorkerRegistration.pushManager.getSubscription())
+          .then(subscription => {
+            if (subscription) {
 
-        // If there are values, precheck the relevant buttons.
-        if (localStoredTopics.length) {
-          for (let i = 0, len = localStoredTopics.length; i < len; i++) {
-            let tid = localStoredTopics[i];
-            let name = 'webpush-topic-' + tid;
-            let $chk = $('input[type="checkbox"][name="' + name + '"]');
-            $chk.prop("checked", true);
-          }
-        }
-        // If there are no values (aka empty array), then suppose that "all"
-        // had been clicked
-        else {
-          $checkboxAll.click();
-        }
-      }
+              that.app.updateWebpushState('enabled');
+
+              const localStoredTopics = this.app.getLocalData('webpush_topics');
+              if (localStoredTopics !== null) {
+
+                // If there are values, precheck the relevant buttons.
+                if (localStoredTopics.length) {
+                  for (let i = 0, len = localStoredTopics.length; i < len; i++) {
+                    let tid = localStoredTopics[i];
+                    let name = 'webpush-topic-' + tid;
+                    let $chk = $('input[type="checkbox"][name="' + name + '"]');
+                    $chk.prop("checked", true);
+                  }
+                }
+                // If there are no values (aka empty array), then suppose that "all"
+                // had been clicked
+                else {
+                  $checkboxAll.click();
+                }
+              }
+              return;
+            }
+          });
     },
 
     uncheckEverything: function () {
