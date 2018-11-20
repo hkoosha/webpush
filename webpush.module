@@ -557,7 +557,6 @@ function _webpush_send_subscription_failure(array $result, Minishlink\WebPush\Su
       }
       break;
     default:
-      // @TODO what should be done here?
       break;
   }
 }
@@ -572,6 +571,7 @@ function webpush__send_notification_batch_wrapper($subscription_id, &$data, &$co
   $title = $data['title'];
   $body = $data['body'];
   $link = $data['link'];
+  $context['results']['notification_entity'] = $data['notification_entity'];
 
   $wrapper = entity_metadata_wrapper('webpush_subscription', $subscription_id);
 
@@ -618,6 +618,7 @@ function webpush__send_notification_batch(WebpushNotification $notification_enti
           'title' => $wrapper->title->value(),
           'body' => $wrapper->body->value(),
           'link' => $wrapper->link->value(),
+          'notification_entity' => $wrapper->value(),
         ],
       ],
     ];
@@ -640,6 +641,12 @@ function webpush__send_notification_batch_finished($success, $results, $operatio
       '@success' => $success,
       '@fail' => $fail,
     ]);
+    $notification_entity = $results["notification_entity"];
+    $notification_wrapper = entity_metadata_wrapper('webpush_notification', $notification_entity);
+    $notification_wrapper->total->set($total);
+    $notification_wrapper->success->set($success);
+    $notification_wrapper->save();
+
     drupal_set_message($msg);
     $keep_invalid = variable_get('webpush_keep_invalid_subscriptions', FALSE);
     if (!$keep_invalid) {

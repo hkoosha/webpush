@@ -48,7 +48,6 @@ function _webpush_notification_entity_info() {
   ];
 
   return $info;
-
 }
 
 function _webpush_notification_entity_property_info() {
@@ -84,6 +83,21 @@ function _webpush_notification_entity_property_info() {
     'type' => 'text',
     'schema field' => 'link',
   ];
+  $info['webpush_notification']['properties']['total'] = [
+    'label' => t('Total'),
+    'description' => t('Total registered subscriptions.'),
+    'type' => 'integer',
+    'schema field' => 'total',
+    'setter callback' => 'entity_property_verbatim_set',
+  ];
+  $info['webpush_notification']['properties']['success'] = [
+    'label' => t('Success'),
+    'description' => t('Successful deliveries.'),
+    'type' => 'integer',
+    'schema field' => 'success',
+    'setter callback' => 'entity_property_verbatim_set',
+  ];
+
 
   return $info;
 }
