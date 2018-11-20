@@ -24,7 +24,6 @@ function webpush_menu() {
     'access arguments' => ['register webpush'],
     'access callback' => TRUE,
     'delivery callback' => 'webpush_deliver_js_file',
-    'file' => 'webpush.pages.inc',
     'type' => MENU_CALLBACK,
   ];
 
@@ -104,9 +103,51 @@ function webpush_menu() {
     'access arguments' => ['send push notifications'],
   ];
 
-
   return $items;
 }
+
+/**
+ * Deliver the JS for the service worker.
+ *
+ * Adds a Service-Worker-Allowed header so that a file served from
+ * '/webpush/serviceworker/js' can have a scope of '/'.
+ */
+function webpush_deliver_js_file($page_callback_result) {
+  drupal_add_http_header('Content-Type', 'application/javascript');
+  drupal_add_http_header('Content-Disposition', 'inline; filename="sw.js"');
+  drupal_add_http_header('Service-Worker-Allowed', base_path());
+  print $page_callback_result;
+}
+
+/**
+ * Returns the JS of the service worker.
+ *
+ * @return mixed
+ */
+function webpush_serviceworker_file_data() {
+  $data = cache_get('webpush:serviceworker', 'cache');
+  if ($data) {
+    $data = $data->data;
+  }
+  else {
+    $data = _webpush_serviceworker_file();
+    cache_set('webpush:serviceworker', $data, 'cache');
+  }
+
+  return $data;
+}
+
+/**
+ * Take the serviceworker template file and return its contents.
+ *
+ * @return string
+ */
+function _webpush_serviceworker_file() {
+  $path = drupal_get_path('module', 'webpush');
+  $sw = file_get_contents($path . '/js/sw.js');
+  return $sw;
+}
+
 
 /**
  * Implements hook_permission().
@@ -234,7 +275,7 @@ function webpush_get_buttons() {
 
 function webpush_webpush_buttons_info() {
   return [
-    'simple_button_id' => 'webpush-simple-sub-button'
+    'simple_button_id' => 'webpush-simple-sub-button',
   ];
 }
 
@@ -262,11 +303,11 @@ function webpush_subscription_registration_callback() {
       $entity = webpush_unregister($subscription);
       break;
 
-//    case 'GET':
-//      if ($subscription) {
-//        $entity = webpush_register__retrieve_entity($subscription);
-//      }
-//      break;
+    //    case 'GET':
+    //      if ($subscription) {
+    //        $entity = webpush_register__retrieve_entity($subscription);
+    //      }
+    //      break;
 
     default:
       break;
@@ -714,4 +755,10 @@ function webpush_subscription__count() {
   $query = "SELECT COUNT(id) FROM {webpush_subscription}";
   $total = db_query($query)->fetchField();
   return $total;
+}
+
+function webpush_views_api() {
+  return [
+    'api' => 3,
+  ];
 }

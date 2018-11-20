@@ -269,3 +269,23 @@ function webpush_topics__get_subscription_entities_without_topics() {
   $result = db_query($sql)->fetchAllAssoc('id');
   return $result ? array_keys($result) : [];
 }
+
+/**
+ * Implements hook_menu_alter().
+ */
+function webpush_topics_menu_alter(&$items) {
+  $items['admin/structure/webpush-notification/manage']['page callback'] = 'webpush_topics_notification__overview';
+}
+
+function webpush_topics_notification__overview() {
+  $content[] = [
+    '#markup' => views_embed_view('webpush_notifications_topics', 'default'),
+  ];
+  return $content;
+}
+
+function webpush_topics_views_api() {
+  return [
+    'api' => 3,
+  ];
+}
