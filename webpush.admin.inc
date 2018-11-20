@@ -165,7 +165,12 @@ function webpush_admin_send_form_submit($form, &$form_state) {
   }
   $notification_entity = webpush_notification__create_entity($title, $body, $link);
 
-  batch_set(webpush__send_notification_batch($notification_entity));
+  $filters = [];
+  if (!empty($form_state['_webpush_filters'])) {
+    $filters = $form_state['_webpush_filters'];
+  }
+
+  batch_set(webpush__send_notification_batch($notification_entity, $filters));
 }
 
 function webpush_admin_configuration_form() {

@@ -202,6 +202,9 @@ function webpush_topics_form_webpush_admin_send_form_alter(&$form, &$form_state,
   // Append custom validation callback.
   $form['#validate'][] = 'webpush_topics_admin_send_form_validate';
   //@TODO implement alter function for the target!!!
+
+  // Prepend custom submit callback, to add the selected topics.
+  array_unshift($form['#submit'], 'webpush_topics_admin_send_form_presubmit');
 }
 
 function webpush_topics_admin_send_form_validate(&$form, &$form_state) {
@@ -214,5 +217,19 @@ function webpush_topics_admin_send_form_validate(&$form, &$form_state) {
       form_error($form['topics_wrapper']['topics_mode'], t('You have to select at least one topic.'));
       return FALSE;
     }
+  }
+}
+
+function webpush_topics_admin_send_form_presubmit(&$form, &$form_state) {
+  $values = $form_state['values'];
+  $topics_mode = $values['topics_mode'];
+  if ($topics_mode === 'select') {
+    $selected_topics = array_filter($form_state["values"]["topics"]);
+    $filter = [
+      'field' => 'webpush_topics',
+      'column' => 'target_id',
+      'value' => $selected_topics,
+    ];
+    $form_state['_webpush_filters'][] = $filter;
   }
 }

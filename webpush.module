@@ -484,10 +484,32 @@ function webpush_register__delete_entity(Minishlink\WebPush\Subscription $subscr
  * @return array|bool
  */
 function webpush_subscription__get_all() {
+//  $query = new EntityFieldQuery();
+//  $query
+//    ->entityCondition('entity_type', 'webpush_subscription')
+//    ->addMetaData('account', user_load(1)); // Run the query as user 1.
+//  $result = $query->execute();
+//  if (isset($result['webpush_subscription'])) {
+//    return array_keys($result['webpush_subscription']);
+//  }
+  return webpush_subscription__get_entities_filtered([]);
+}
+
+function webpush_subscription__get_entities_filtered(array $filters) {
   $query = new EntityFieldQuery();
   $query
     ->entityCondition('entity_type', 'webpush_subscription')
     ->addMetaData('account', user_load(1)); // Run the query as user 1.
+
+  if (!empty($filters)) {
+    foreach ($filters as $filter) {
+      $field = $filter['field'];
+      $column = $filter['column'];
+      $value = is_array($filter['value']) ? $filter['value'] : [$filter['value']];
+      $query->fieldCondition($field, $column, $value, 'IN');
+    }
+  }
+
   $result = $query->execute();
   if (isset($result['webpush_subscription'])) {
     return array_keys($result['webpush_subscription']);
@@ -599,10 +621,15 @@ function webpush__send_notification_batch_wrapper($subscription_id, &$data, &$co
 }
 
 
-function webpush__send_notification_batch(WebpushNotification $notification_entity) {
+function webpush__send_notification_batch(WebpushNotification $notification_entity, array $filters) {
   $wrapper = entity_metadata_wrapper('webpush_notification', $notification_entity);
   drupal_set_message('Sending push notification');
-  $subscriptions = webpush_subscription__get_all();
+  if (empty($filters)) {
+    $subscriptions = webpush_subscription__get_all();
+  }
+  else {
+    $subscriptions = webpush_subscription__get_entities_filtered($filters);
+  }
   $operations = [];
   foreach ($subscriptions as $subscription_id) {
     $operations[] = [
