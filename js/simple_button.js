@@ -2,6 +2,10 @@
   Drupal.behaviors.webPushSimpleButton = {
     attach: function (context, settings) {
 
+      if (Drupal.behaviors.webPushApp === undefined) {
+        return;
+      }
+
       // Initialize
       this.app = Drupal.behaviors.webPushApp;
       // Assign the button to the app property.

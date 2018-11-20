@@ -243,8 +243,8 @@
 
               Until now, I couldn't find any way to relate those two
               PushSubscription objects (if you, dear developer who reads these
-              comments, know any way, PLEASE PLEASE PLEASE open a new task in
-              the module's issue queue
+              comments, know any way, PLEASE open a new task in the module's
+              issue queue
               (@see https://www.drupal.org/project/issues/webpush)
 
               The new endpoint must be sent to our server. We'll try to look

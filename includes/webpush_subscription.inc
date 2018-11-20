@@ -65,6 +65,7 @@ function _webpush_subscription_entity_property_info() {
     'type' => 'text',
     'schema field' => 'subscription',
     'setter callback' => 'entity_property_verbatim_set',
+    'getter callback' => 'entity_property_verbatim_get',
   ];
   $info['webpush_subscription']['properties']['created'] = [
     'label' => t('Created'),
