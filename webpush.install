@@ -125,7 +125,13 @@ function webpush_schema() {
  * At uninstall time we'll notify field.module that the entity was deleted
  * so that attached fields can be cleaned up.
  */
-function TODO___webpush_uninstall() {
+function webpush_uninstall() {
   field_attach_delete_bundle('webpush_subscription', 'webpush_subscription');
   field_attach_delete_bundle('webpush_notification', 'webpush_notification');
+  variable_delete('webpush_public_key');
+  variable_delete('webpush_private_key');
+  variable_delete('webpush_link_type');
+  variable_delete('webpush_icon_fid');
+  variable_delete('webpush_badge_fid');
+  variable_delete('webpush_keep_invalid_subscriptions');
 }
