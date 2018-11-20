@@ -165,12 +165,12 @@ function webpush_admin_send_form_submit($form, &$form_state) {
   }
   $notification_entity = webpush_notification__create_entity($title, $body, $link);
 
-  $filters = [];
-  if (!empty($form_state['_webpush_filters'])) {
-    $filters = $form_state['_webpush_filters'];
+  $targets = [];
+  if (!empty($form_state['_webpush_targets'])) {
+    $targets = $form_state['_webpush_targets'];
   }
 
-  batch_set(webpush__send_notification_batch($notification_entity, $filters));
+  batch_set(webpush__send_notification_batch($notification_entity, $targets));
 }
 
 function webpush_admin_configuration_form() {

@@ -223,13 +223,48 @@ function webpush_topics_admin_send_form_validate(&$form, &$form_state) {
 function webpush_topics_admin_send_form_presubmit(&$form, &$form_state) {
   $values = $form_state['values'];
   $topics_mode = $values['topics_mode'];
+
+  // _webpush_targets
+
+
   if ($topics_mode === 'select') {
     $selected_topics = array_filter($form_state["values"]["topics"]);
-    $filter = [
-      'field' => 'webpush_topics',
-      'column' => 'target_id',
-      'value' => $selected_topics,
-    ];
-    $form_state['_webpush_filters'][] = $filter;
+
+    // Get the subscriptions of these topics
+    $targets_with_topics = webpush_topics__get_subscription_entities_filtered($selected_topics);
+
+    // and the ones that are subscribed to all topics
+    // Note: This is needed, because EntityFieldQuery does not support IS NULL
+    // filtering.
+    // @see https://www.drupal.org/project/drupal/issues/1157006
+    $targets_without_topics = webpush_topics__get_subscription_entities_without_topics();
+
+    $targets = array_merge($targets_with_topics, $targets_without_topics);
+    $form_state['_webpush_targets'] = $targets;
   }
+}
+
+function webpush_topics__get_subscription_entities_filtered($topics) {
+  $query = new EntityFieldQuery();
+  $query
+    ->entityCondition('entity_type', 'webpush_subscription')
+    ->fieldCondition('webpush_topics', 'target_id', $topics, 'IN')
+    ->addMetaData('account', user_load(1)); // Run the query as user 1.
+  $result = $query->execute();
+  if (isset($result['webpush_subscription'])) {
+    return array_keys($result['webpush_subscription']);
+  }
+  return FALSE;
+}
+
+function webpush_topics__get_subscription_entities_without_topics() {
+  $sql = "SELECT webpush_subscription.id AS id
+          FROM  {webpush_subscription} 
+          LEFT JOIN {field_data_webpush_topics} AS field_data_webpush_topics
+            ON webpush_subscription.id = field_data_webpush_topics.entity_id 
+            AND field_data_webpush_topics.entity_type = 'webpush_subscription' 
+            AND field_data_webpush_topics.deleted = '0'
+          WHERE field_data_webpush_topics.webpush_topics_target_id IS NULL";
+  $result = db_query($sql)->fetchAllAssoc('id');
+  return $result ? array_keys($result) : [];
 }
