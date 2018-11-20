@@ -388,7 +388,7 @@ function webpush_register__create_entity(Minishlink\WebPush\Subscription $subscr
   $entity_type = 'webpush_subscription';
   $entity = entity_create($entity_type, [
     'subscription' => $serialized,
-    'created' => format_date(REQUEST_TIME, 'custom', 'Y-m-d H:i:s'),
+    'created' => REQUEST_TIME,
   ]);
   $entity->save();
 
@@ -429,7 +429,7 @@ function webpush_notification__create_entity($title, $body, $link) {
     'title' => $title,
     'body' => $body,
     'link' => $link,
-    'created' => format_date(REQUEST_TIME, 'custom', 'Y-m-d H:i:s'),
+    'created' => REQUEST_TIME,
   ]);
   $entity->save();
 
