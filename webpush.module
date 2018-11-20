@@ -186,6 +186,10 @@ function webpush_block_view($delta = '') {
 }
 
 function _webpush_block_build() {
+  if (!webpush_is_enabled() || !user_access('register webpush')) {
+    return [];
+  }
+
   $block = [
     'message' => [
       '#type' => 'markup',
@@ -199,10 +203,6 @@ function _webpush_block_build() {
       ],
 
       'js' => [
-//        [
-//          'type' => 'setting',
-//          'data' => ['webpush' => ['simple_button_id' => 'webpush-simple-sub-button']],
-//        ],
         [
           'data' => drupal_get_path('module', 'webpush') . '/js/simple_button.js',
           'type' => 'file',

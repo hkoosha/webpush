@@ -28,6 +28,10 @@ function webpush_topics_block_info() {
  * Implements hook_block_view().
  */
 function webpush_topics_block_view($delta = '') {
+  if (!webpush_is_enabled() || !user_access('register webpush')) {
+    return [];
+  }
+
   $block = [];
 
   switch ($delta) {
@@ -41,10 +45,6 @@ function webpush_topics_block_view($delta = '') {
             drupal_get_path('module', 'webpush_topics') . '/css/user_panel.css',
           ],
           'js' => [
-//            [
-//              'type' => 'setting',
-//              'data' => ['webpush' => ['topics_button_id' => 'webpush-topics-subscribe']],
-//            ],
             [
               'data' => drupal_get_path('module', 'webpush_topics') . '/js/user_panel.js',
               'type' => 'file',
