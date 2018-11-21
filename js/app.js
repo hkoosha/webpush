@@ -291,7 +291,7 @@
     },
 
     notifyUser: function () {
-      const notifyUserMessage = Drupal.t('You have been unsubscribed from push notifications because you cleared your local cache.',
+      const notifyUserMessage = Drupal.t('You have been unsubscribed from push notifications because you cleared your local cache, or because the service was updated.',
           {}, {context: "webpush"});
       const $notifyUserMessage = $('<div class="webpush-notify-user"/>')
           .html(notifyUserMessage);
