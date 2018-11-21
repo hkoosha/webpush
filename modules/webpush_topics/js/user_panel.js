@@ -12,6 +12,8 @@
       if (!$button.length) {
         return;
       }
+      this.initializeBellIcon();
+
       this.initializeCheckboxes();
 
       $button[0].addEventListener("webpush-state-update", function (event) {
@@ -44,6 +46,14 @@
     },
 
     app: Drupal.behaviors.webPushApp,
+
+    initializeBellIcon: function () {
+      const $toggler = $('#webpush-topics-user-panel-wrapper');
+      const $panel = $('#webpush-topics-panel');
+      $toggler.click(function () {
+        $panel.toggleClass('expanded');
+      });
+    },
 
     initializeCheckboxes: function () {
       const that = this;

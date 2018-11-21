@@ -1,14 +1,15 @@
 #webpush-topics-user-panel-wrapper {
   position: fixed;
-  left: 100px;
-  bottom: 20px;
+  left: 25px;
+  bottom: 25px;
   z-index: 999;
-
+  background-color: rgba(255,255,255,0.95);
   background-repeat: no-repeat;
   background-position: bottom 10px left 10px;
   padding: 10px;
-  min-width: 90px;
-  min-height: 90px;
+  min-width: 84px;
+  min-height: 84px;
+  border-radius: 50%;
 }
 
 #webpush-topics-user-panel-wrapper[data-webpush-state="enabled"],
@@ -40,11 +41,29 @@
 
 }
 
-#webpush-topics-panel {
-  display: none;
-  margin-bottom: 70px;
+#webpush-topics-user-panel-wrapper:hover {
+  background-color: rgba(255,255,255,0.95);
 }
 
-#webpush-topics-user-panel-wrapper:hover #webpush-topics-panel {
+#webpush-topics-panel {
+  display: none;
+}
+
+#webpush-topics-panel.expanded {
   display: block;
+  background-color: rgba(255,255,255,0.95);
+  position: fixed;
+  bottom: 120px;
+  left: 30px;
+  padding: 10px;
+  border-radius: 2px;
+  border: 1px solid grey;
+}
+
+.webpush-topics-button {
+  border: 1px solid grey;
+  margin-bottom: 3px;
+  margin-top: 3px;
+  padding-left: 5px;
+  padding-right: 5px;
 }
