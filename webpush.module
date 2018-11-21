@@ -73,19 +73,27 @@ function webpush_menu() {
     'access arguments' => ['send push notifications'],
   ];
 
+  $items['admin/reports/webpush-subscriptions'] = [
+    'title' => 'WebPush Subscriptions',
+    'description' => 'Overview of WebPush subscriptions.',
+    'page callback' => 'webpush_subscription__overview',
+    'file' => 'includes/webpush_subscription.inc',
+    'access arguments' => ['send push notifications'],
+  ];
+
 
   // Items related to WebPush Subscription entity.
   $items['admin/structure/webpush-subscription/manage'] = [
     'title' => 'WebPush subscriptions',
-    'page callback' => 'webpush_subscription__overview',
+    'page callback' => 'webpush_subscription__fake_overview',
     'file' => 'includes/webpush_subscription.inc',
     'access arguments' => ['administer webpush'],
   ];
 
-  $items['admin/structure/webpush-subscription/manage/list'] = [
+  $items['admin/structure/webpush-subscription/manage/overview'] = [
     'title' => 'Overview',
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    'access arguments' => ['send push notifications'],
+    'access arguments' => ['administer webpush'],
   ];
 
 

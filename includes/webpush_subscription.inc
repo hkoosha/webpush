@@ -84,3 +84,10 @@ function webpush_subscription__overview() {
   ];
   return $content;
 }
+
+function webpush_subscription__fake_overview() {
+  $content[] = [
+    '#markup' => t('No administration items.'),
+  ];
+  return $content;
+}
