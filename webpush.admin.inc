@@ -19,9 +19,10 @@ function webpush_admin_send_form() {
   ];
 
   $form['body'] = [
-    '#type' => 'textarea',
+    '#type' => 'textfield',
     '#title' => t('Body'),
     '#description' => t('Body description.'),
+    '#maxlength' => 2048,
     '#required' => TRUE,
   ];
 
@@ -49,6 +50,7 @@ function webpush_admin_send_form() {
   $form['link']['link_custom'] = [
     '#type' => 'textfield',
     '#title' => t('Custom link'),
+    '#maxlength' => 512,
     '#states' => [
       'visible' => [
         ':input[name="link_type"]' => ['value' => 'custom'],
