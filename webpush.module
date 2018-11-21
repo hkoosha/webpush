@@ -35,28 +35,16 @@ function webpush_menu() {
   ];
 
   $items['admin/config/services/webpush'] = [
-    'type' => MENU_NORMAL_ITEM,
     'title' => 'Webpush',
     'description' => 'Webpush settings.',
-    'access arguments' => ['send push notifications'],
+    'access arguments' => ['administer webpush'],
     'file' => 'webpush.admin.inc',
     'page callback' => 'drupal_get_form',
-    'page arguments' => ['webpush_admin_send_form'],
-  ];
-
-  $items['admin/config/services/webpush/send'] = [
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'title' => 'Send notification',
-    'description' => 'Send ush notifications to subscribed users.',
-    'weight' => -100,
-    'access arguments' => ['send push notifications'],
-    'file' => 'webpush.admin.inc',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => ['webpush_admin_send_form'],
+    'page arguments' => ['webpush_admin_configuration_form'],
   ];
 
   $items['admin/config/services/webpush/configure'] = [
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
     'title' => 'Configuration',
     'description' => 'Webpush settings.',
     'access arguments' => ['administer webpush'],
@@ -94,6 +82,96 @@ function webpush_menu() {
 
   return $items;
 }
+
+/**
+ * Implements hook_menu_alter().
+ */
+function webpush_menu_alter(&$items) {
+  $items['admin/content/webpush']['type'] = MENU_LOCAL_TASK;
+  $items['admin/content/webpush']['title'] = t('WebPush');
+
+  $items['admin/content/webpush/add']['page callback'] = 'drupal_get_form';
+  $items['admin/content/webpush/add']['page arguments'] = ['webpush_admin_send_form'];
+
+
+  //  $items['admin/content/webpush']['page callback'] = 'webpush_notification__overview';
+}
+
+function webpush_admin_send_form() {
+  $form = [];
+
+  if (!webpush_subscription__count()) {
+    return [
+      'no_subscriptions_message' => [
+        '#markup' => t('You need to have at least one registered subscription in order to send a push notification, but it seems that you have none.'),
+      ],
+    ];
+  }
+
+  $form['title'] = [
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#description' => t('Title description.'),
+    '#required' => TRUE,
+  ];
+
+  $form['body'] = [
+    '#type' => 'textfield',
+    '#title' => t('Body'),
+    '#description' => t('Body description.'),
+    '#maxlength' => 2048,
+    '#required' => TRUE,
+  ];
+
+  $form['link'] = [
+    '#type' => 'fieldset',
+    '#title' => t('Link'),
+  ];
+  $form['link']['link_type'] = [
+    '#type' => 'radios',
+    '#title' => t('Link type'),
+    '#options' => webpush_link_type_options(),
+    '#default_value' => variable_get('webpush_link_type', 'frontpage'),
+  ];
+  $form['link']['link_node'] = [
+    '#type' => 'textfield',
+    '#title' => t('Node'),
+    '#description' => t('Autocomplete field'),
+    '#states' => [
+      'visible' => [
+        ':input[name="link_type"]' => ['value' => 'node'],
+      ],
+    ],
+    '#autocomplete_path' => 'webpush/autocomplete-node',
+  ];
+  $form['link']['link_custom'] = [
+    '#type' => 'textfield',
+    '#title' => t('Custom link'),
+    '#maxlength' => 512,
+    '#states' => [
+      'visible' => [
+        ':input[name="link_type"]' => ['value' => 'custom'],
+      ],
+    ],
+  ];
+
+  $form['submit'] = [
+    '#type' => 'submit',
+    '#value' => t('Send'),
+    '#weight' => 100,
+  ];
+
+  return $form;
+}
+
+function webpush_link_type_options() {
+  return [
+    'frontpage' => t('Frontpage'),
+    'node' => t('Node'),
+    'custom' => t('Custom'),
+  ];
+}
+
 
 /**
  * Deliver the JS for the service worker.

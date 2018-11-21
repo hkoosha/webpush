@@ -15,6 +15,16 @@ class WebpushNotificationController extends EntityAPIController {
 
 }
 
+class WebpushNotificationUIController extends EntityDefaultUIController {
+  /**
+   * Builds the entity overview form.
+   */
+  public function overviewForm($form, &$form_state) {
+    $form['content'] = webpush_notification__overview();
+    return $form;
+  }
+}
+
 function _webpush_notification_entity_info() {
   $info = [];
 
@@ -30,8 +40,8 @@ function _webpush_notification_entity_info() {
     'access callback' => 'webpush_notification_access_callback',
     //    'uri callback' => 'entity_class_uri',
     'admin ui' => [
-      'path' => 'admin/webpush-notification',
-      'controller class' => 'EntityDefaultUIController',
+      'path' => 'admin/content/webpush',
+      'controller class' => 'WebpushNotificationUIController',
     ],
     'module' => 'webpush',
     'fieldable' => TRUE,
