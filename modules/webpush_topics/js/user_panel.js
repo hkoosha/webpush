@@ -28,6 +28,8 @@
             return i.checked ? i.value : false;
           }).filter(i => i !== false);
           Drupal.behaviors.webPushApp.push_subscribe({webpush_topics: topics});
+          const $panel = $('#webpush-topics-panel');
+          $panel.removeClass('expanded');
         });
       });
 
@@ -39,6 +41,8 @@
             Drupal.behaviors.webPushApp.push_unsubscribe();
             that.uncheckEverything();
           }
+          const $panel = $('#webpush-topics-panel');
+          $panel.removeClass('expanded');
         });
       });
 
