@@ -82,33 +82,14 @@ function webpush_menu() {
   ];
 
 
-  // Items related to WebPush Subscription entity.
+  // Dummy elements for the entities administration pages.
   $items['admin/structure/webpush-subscription/manage'] = [
     'title' => 'WebPush subscriptions',
-    'page callback' => 'webpush_subscription__fake_overview',
-    'file' => 'includes/webpush_subscription.inc',
     'access arguments' => ['administer webpush'],
   ];
-
-  $items['admin/structure/webpush-subscription/manage/overview'] = [
-    'title' => 'Overview',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'access arguments' => ['administer webpush'],
-  ];
-
-
-  // Items related to WebPush Notification entity.
   $items['admin/structure/webpush-notification/manage'] = [
     'title' => 'WebPush notifications',
-    'page callback' => 'webpush_notification__overview',
-    'file' => 'includes/webpush_notification.inc',
     'access arguments' => ['administer webpush'],
-  ];
-
-  $items['admin/structure/webpush-notification/manage/list'] = [
-    'title' => 'Overview',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'access arguments' => ['send push notifications'],
   ];
 
   return $items;

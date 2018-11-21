@@ -277,7 +277,7 @@ function webpush_topics__get_subscription_entities_without_topics() {
  * Implements hook_menu_alter().
  */
 function webpush_topics_menu_alter(&$items) {
-  $items['admin/structure/webpush-notification/manage']['page callback'] = 'webpush_topics_notification__overview';
+//  $items['admin/structure/webpush-notification/manage']['page callback'] = 'webpush_topics_notification__overview';
   $items['admin/reports/webpush-subscriptions']['page callback'] = 'webpush_topics_subscription__overview';
 }
 
