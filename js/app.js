@@ -36,7 +36,7 @@
 
       // Register the service worker.
       const that = this;
-      navigator.serviceWorker.register("webpush/serviceworker/js", {scope: '/'})
+      navigator.serviceWorker.register("/webpush/serviceworker/js", {scope: '/'})
           .then(() => {
             console.log('[SW] Service worker has been registered');
             that.push_updateSubscription();
