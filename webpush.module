@@ -1,19 +1,6 @@
 <?php
 
 /**
- *
- * Things left todo:
- *
- *
- *
- * - Fix: notifications listing page, default view does not work
- *
- * - Also: new view when topics
- *
- */
-
-
-/**
  * Implements hook_menu().
  */
 function webpush_menu() {
@@ -49,9 +36,20 @@ function webpush_menu() {
     'description' => 'Webpush settings.',
     'access arguments' => ['administer webpush'],
     'file' => 'webpush.admin.inc',
-    'weight' => 100,
     'page callback' => 'drupal_get_form',
     'page arguments' => ['webpush_admin_configuration_form'],
+    'weight' => 5,
+  ];
+
+  $items['admin/config/services/webpush/advanced'] = [
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Advanced',
+    'description' => 'Advanced webpush settings.',
+    'access arguments' => ['administer webpush'],
+    'file' => 'webpush.admin.inc',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['webpush_admin_advanced_configuration_form'],
+    'weight' => 10,
   ];
 
   $items['webpush/autocomplete-node'] = [
@@ -904,14 +902,14 @@ function webpush_entity_property_info() {
  * Access callback for WebPush Subscription drupal entity.
  */
 function webpush_subscription_access_callback() {
-  return user_access('send push notifications');
+  return user_access('administer webpush');
 }
 
 /**
  * Access callback for WebPush Subscription drupal entity.
  */
 function webpush_notification_access_callback() {
-  return user_access('send push notifications');
+  return user_access('administer webpush');
 }
 
 function webpush_subscription__count() {

@@ -16,31 +16,8 @@ function webpush_autocomplete_node_callback($string = "") {
   drupal_json_output($matches);
 }
 
-
 function webpush_admin_configuration_form() {
   $form = [];
-
-  $form['app_keys'] = [
-    '#type' => 'fieldset',
-    '#title' => t('App keys'),
-    '#description' => t('You can use this site to create your app keys:') . ' <a href="https://web-push-codelab.glitch.me/">https://web-push-codelab.glitch.me</a>',
-    '#collapsible' => TRUE,
-    '#collapsed' => webpush_is_enabled(),
-  ];
-  $form['app_keys']['webpush_public_key'] = [
-    '#type' => 'textfield',
-    '#title' => t('Public key'),
-    '#description' => t('Public key description.'),
-    '#default_value' => variable_get('webpush_public_key', ''),
-    '#required' => TRUE,
-  ];
-  $form['app_keys']['webpush_private_key'] = [
-    '#type' => 'textfield',
-    '#title' => t('Private key'),
-    '#description' => t('Private key description.'),
-    '#default_value' => variable_get('webpush_private_key', ''),
-    '#required' => TRUE,
-  ];
 
   $form['default_values'] = [
     '#type' => 'fieldset',
@@ -74,21 +51,6 @@ function webpush_admin_configuration_form() {
     '#upload_location' => 'public://',
   ];
 
-  $collapse = !variable_get('webpush_keep_invalid_subscriptions', FALSE);
-  $form['debug'] = [
-    '#type' => 'fieldset',
-    '#title' => t('Debug'),
-    '#description' => t('Several options that can be used for debugging.'),
-    '#collapsible' => TRUE,
-    '#collapsed' => $collapse,
-  ];
-  $form['debug']['webpush_keep_invalid_subscriptions'] = [
-    '#type' => 'checkbox',
-    '#title' => t('Keep invalid subscriptions'),
-    '#description' => t('Enable this option if you want to keep the subscriptions in your database even if the sending of a notification has failed.'),
-    '#default_value' => variable_get('webpush_keep_invalid_subscriptions', FALSE),
-  ];
-
   $form = system_settings_form($form);
   $form['#submit'][] = 'webpush_admin_configuration_form_submit__images';
 
@@ -117,4 +79,47 @@ function webpush_admin_configuration_form_submit__images($form, &$form_state) {
       }
     }
   }
+}
+
+function webpush_admin_advanced_configuration_form() {
+  $form = [];
+
+  $form['app_keys'] = [
+    '#type' => 'fieldset',
+    '#title' => t('App keys'),
+    '#description' => t('You can use this site to create your app keys:') . ' <a href="https://web-push-codelab.glitch.me/">https://web-push-codelab.glitch.me</a>',
+    '#collapsible' => FALSE,
+  ];
+  $form['app_keys']['webpush_public_key'] = [
+    '#type' => 'textfield',
+    '#title' => t('Public key'),
+    '#description' => t('Public key description.'),
+    '#default_value' => variable_get('webpush_public_key', ''),
+    '#required' => TRUE,
+  ];
+  $form['app_keys']['webpush_private_key'] = [
+    '#type' => 'textfield',
+    '#title' => t('Private key'),
+    '#description' => t('Private key description.'),
+    '#default_value' => variable_get('webpush_private_key', ''),
+    '#required' => TRUE,
+  ];
+
+  $collapse = !variable_get('webpush_keep_invalid_subscriptions', FALSE);
+  $form['debug'] = [
+    '#type' => 'fieldset',
+    '#title' => t('Debug'),
+    '#description' => t('Several options that can be used for debugging.'),
+    '#collapsible' => FALSE,
+  ];
+  $form['debug']['webpush_keep_invalid_subscriptions'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Keep invalid subscriptions'),
+    '#description' => t('Enable this option if you want to keep the subscriptions in your database even if the sending of a notification has failed.'),
+    '#default_value' => variable_get('webpush_keep_invalid_subscriptions', FALSE),
+  ];
+
+  $form = system_settings_form($form);
+
+  return $form;
 }
