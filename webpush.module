@@ -160,6 +160,7 @@ function webpush_admin_send_form() {
 }
 
 function webpush_admin_send_form_validate(&$form, &$form_state) {
+  global $base_url;
   $values = $form_state['values'];
 
   if ($values['link_type'] == 'node') {
@@ -209,10 +210,16 @@ function webpush_admin_send_form_validate(&$form, &$form_state) {
 
   }
   elseif ($values['link_type'] == 'custom') {
-    if (!valid_url($values['link_custom'], TRUE)) {
+    $url = $values['link_custom'];
+    if (!valid_url($url, TRUE)) {
       form_error($form['link']['link_custom'], t('The url you typed is not valid. It has to begin with http:// or https://'));
       return FALSE;
     }
+    if (strpos($url, $base_url) !== 0) {
+      form_error($form['link']['link_custom'], t('You can only add urls from the current domain (!url)', ['!url' => $base_url]));
+      return FALSE;
+    }
+
   }
 }
 
