@@ -16,6 +16,7 @@ class WebpushNotificationController extends EntityAPIController {
 }
 
 class WebpushNotificationUIController extends EntityDefaultUIController {
+
   /**
    * Builds the entity overview form.
    */

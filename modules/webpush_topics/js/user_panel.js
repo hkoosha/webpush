@@ -98,8 +98,8 @@
                     $chk.prop("checked", true);
                   }
                 }
-                // If there are no values (aka empty array), then suppose that "all"
-                // had been clicked
+                // If there are no values (aka empty array), then suppose that
+                // "all" had been clicked
                 else {
                   $checkboxAll.click();
                 }

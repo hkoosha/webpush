@@ -30,7 +30,7 @@ self.addEventListener('push', function (event) {
   }
 });
 
-self.addEventListener('notificationclick', function(event) {
+self.addEventListener('notificationclick', function (event) {
   event.notification.close();
   Promise.resolve();
   clients.openWindow(event.notification.data.url);

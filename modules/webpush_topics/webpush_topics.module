@@ -2,13 +2,13 @@
 
 function webpush_topics_webpush_properties_info() {
   return [
-    'webpush_topics'
+    'webpush_topics',
   ];
 }
 
 function webpush_topics_webpush_buttons_info() {
   return [
-    'topics_button_id' => 'webpush-topics-subscribe'
+    'topics_button_id' => 'webpush-topics-subscribe',
   ];
 }
 
@@ -277,7 +277,7 @@ function webpush_topics__get_subscription_entities_without_topics() {
  * Implements hook_menu_alter().
  */
 function webpush_topics_menu_alter(&$items) {
-//  $items['admin/structure/webpush-notification/manage']['page callback'] = 'webpush_topics_notification__overview';
+  //  $items['admin/structure/webpush-notification/manage']['page callback'] = 'webpush_topics_notification__overview';
   $items['admin/reports/webpush-subscriptions']['page callback'] = 'webpush_topics_subscription__overview';
 }
 
@@ -306,7 +306,10 @@ function webpush_topics_subscription__overview() {
   foreach ($topics as $topic_tid => $topic_label) {
     $content[] = [
       '#prefix' => '<li>',
-      '#markup' => t('<em>!topic:</em> <strong>!count</strong> subscription(s).', ['!topic' => $topic_label, '!count' => count(webpush_topics__get_subscription_entities_filtered([$topic_tid]))]),
+      '#markup' => t('<em>!topic:</em> <strong>!count</strong> subscription(s).', [
+        '!topic' => $topic_label,
+        '!count' => count(webpush_topics__get_subscription_entities_filtered([$topic_tid])),
+      ]),
       '#suffix' => '</li>',
     ];
   }
@@ -316,6 +319,6 @@ function webpush_topics_subscription__overview() {
     '#markup' => t('<em>All topics:</em> <strong>!count</strong> subscription(s).', ['!count' => count(webpush_topics__get_subscription_entities_without_topics())]),
     '#suffix' => '</li></ul>',
   ];
-  
+
   return $content;
 }

@@ -63,7 +63,7 @@ $handler->display->display_options['sorts']['created']['id'] = 'created';
 $handler->display->display_options['sorts']['created']['table'] = 'webpush_notification';
 $handler->display->display_options['sorts']['created']['field'] = 'created';
 $handler->display->display_options['sorts']['created']['order'] = 'DESC';
-$translatables['webpush_notifications'] = array(
+$translatables['webpush_notifications'] = [
   t('Master'),
   t('Webpush notifications'),
   t('more'),
@@ -87,6 +87,6 @@ $translatables['webpush_notifications'] = array(
   t('Link'),
   t('Total'),
   t('Success'),
-);
+];
 
 return $view;

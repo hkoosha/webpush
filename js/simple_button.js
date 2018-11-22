@@ -19,7 +19,7 @@
       $button.once('webpush-subscription-click', function () {
         $(this).click(function () {
           const state = $button.attr('data-webpush-state');
-          if ( state === 'enabled' || state === 'disabled' ) {
+          if (state === 'enabled' || state === 'disabled') {
             if (Drupal.behaviors.webPushApp.isPushEnabled) {
               Drupal.behaviors.webPushApp.push_unsubscribe({});
             }

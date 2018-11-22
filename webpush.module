@@ -770,9 +770,10 @@ function _webpush_send_subscription_failure(array $result, Minishlink\WebPush\Su
  * Initiates the notification sending procedure.
  *
  * @param $subscription_id
+ * @param $data
  * @param $context
  */
-function webpush__send_notification_batch_wrapper($subscription_id, &$data, &$context) {
+function webpush__send_notification_batch_wrapper($subscription_id, $data, &$context) {
   $title = $data['title'];
   $body = $data['body'];
   $link = $data['link'];
@@ -820,13 +821,12 @@ function webpush__send_notification_batch(WebpushNotification $notification_enti
       'link' => $wrapper->link->value(),
       'notification_entity' => $wrapper->value(),
     ];
-    $params = [
-      'subscription_id' => $subscription_id,
-      'data' => $data,
-    ];
     $operations[] = [
       'webpush__send_notification_batch_wrapper',
-      $params,
+      [
+        'subscription_id' => $subscription_id,
+        'data' => $data,
+      ],
     ];
   }
   $batch = [
