@@ -106,14 +106,14 @@ function webpush_admin_send_form() {
   $form['title'] = [
     '#type' => 'textfield',
     '#title' => t('Title'),
-    '#description' => t('Title description.'),
+    '#description' => t('The title of your notification.'),
     '#required' => TRUE,
   ];
 
   $form['body'] = [
     '#type' => 'textfield',
     '#title' => t('Body'),
-    '#description' => t('Body description.'),
+    '#description' => t('The body of your notification.'),
     '#maxlength' => 2048,
     '#required' => TRUE,
   ];
