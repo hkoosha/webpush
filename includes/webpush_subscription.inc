@@ -28,9 +28,7 @@ function _webpush_subscription_entity_info() {
       'id' => 'id',
     ],
     'access callback' => 'webpush_subscription_access_callback',
-    //    'uri callback' => 'entity_class_uri',
     'admin ui' => [
-      'path' => 'admin/webpush-subscription',
       'controller class' => 'EntityDefaultUIController',
     ],
     'module' => 'webpush',
