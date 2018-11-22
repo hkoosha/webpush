@@ -88,7 +88,7 @@ function webpush_menu() {
  */
 function webpush_menu_alter(&$items) {
   $items['admin/content/webpush']['type'] = MENU_LOCAL_TASK;
-  $items['admin/content/webpush']['title'] = t('WebPush');
+  $items['admin/content/webpush']['title'] = t('Push notifications');
 
   $items['admin/content/webpush/add']['page callback'] = 'drupal_get_form';
   $items['admin/content/webpush/add']['page arguments'] = ['webpush_admin_send_form'];
