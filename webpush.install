@@ -10,7 +10,7 @@ function webpush_requirements($phase) {
   if (!module_exists('composer_manager') && !class_exists('\Minishlink\WebPush\Subscription')) {
     $requirements['webpush_php_library'] = [
       'title' => $t('WebPush PHP library'),
-      'description' => $t('WebPush requires the <a href="@library_url">WebPush PHP(<code>minishlink/web-push</code>)</a> library to be installed and autoloaded with composer (e.g. using the <a href="@composer_manager_url">composer_manager</a> module).', [
+      'description' => $t('WebPush requires the <a href="@library_url">WebPush PHP (<code>minishlink/web-push</code>)</a> library to be installed and autoloaded with composer (e.g. using the <a href="@composer_manager_url">composer_manager</a> module).', [
         '@library_url' => 'https://github.com/web-push-libs/web-push-php',
         '@composer_manager_url' => 'https://www.drupal.org/project/composer_manager',
       ]),
