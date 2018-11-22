@@ -814,16 +814,17 @@ function webpush__send_notification_batch(WebpushNotification $notification_enti
 
   $operations = [];
   foreach ($subscriptions as $subscription_id) {
+    $data = [
+      'title' => $wrapper->title->value(),
+      'body' => $wrapper->body->value(),
+      'link' => $wrapper->link->value(),
+      'notification_entity' => $wrapper->value(),
+    ];
     $operations[] = [
       'webpush__send_notification_batch_wrapper',
       [
         'subscription_id' => $subscription_id,
-        'data' => [
-          'title' => $wrapper->title->value(),
-          'body' => $wrapper->body->value(),
-          'link' => $wrapper->link->value(),
-          'notification_entity' => $wrapper->value(),
-        ],
+        'data' => $data,
       ],
     ];
   }
