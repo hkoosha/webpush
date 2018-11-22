@@ -55,7 +55,10 @@
       const $toggler = $('#webpush-topics-user-panel-wrapper');
       const $panel = $('#webpush-topics-panel');
       $toggler.click(function () {
-        $panel.toggleClass('expanded');
+        const state = Drupal.behaviors.webPushApp.getWebpushState();
+        if (state === 'enabled' || state === 'disabled') {
+          $panel.toggleClass('expanded');
+        }
       });
     },
 

@@ -161,6 +161,10 @@
       });
     },
 
+    getWebpushState: function () {
+      return this.state;
+    },
+
     updateWebpushState: function (state) {
       this.state = state;
 
