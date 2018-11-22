@@ -837,9 +837,9 @@ function webpush__send_notification_batch(WebpushNotification $notification_enti
 
 function webpush__send_notification_batch_finished($success, $results, $operations) {
   if ($success) {
-    $total = (int) $results['webpush_success'] + (int) $results['webpush_fail'];
-    $success = (int) $results['webpush_success'];
-    $fail = (int) $results['webpush_fail'];
+    $success = isset($results['webpush_success']) ? (int) $results['webpush_success'] : 0;
+    $fail = isset($results['webpush_fail']) ? (int) $results['webpush_fail'] : 0;
+    $total = $success + $fail;
     $msg = t('Attempted to send @count push notifications. @success have successfully been sent and @fail have failed.', [
       '@count' => $total,
       '@success' => $success,
