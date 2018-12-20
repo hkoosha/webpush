@@ -357,7 +357,7 @@ function webpush_preprocess_html(&$variables) {
   drupal_add_js(['webpush' => ['buttons' => webpush_get_buttons()]], ['type' => 'setting']);
 
   // Load the app script.
-  drupal_add_js(drupal_get_path('module', 'webpush') . '/js/app.js', 'file');
+  drupal_add_js(drupal_get_path('module', 'webpush') . '/js/build/app.js', 'file');
 
   // Load the service worker.
   drupal_add_js(['webpush' => ['path' => url('/webpush/serviceworker/js')]], 'setting');
@@ -413,7 +413,7 @@ function _webpush_block_build() {
 
       'js' => [
         [
-          'data' => drupal_get_path('module', 'webpush') . '/js/simple_button.js',
+          'data' => drupal_get_path('module', 'webpush') . '/js/build/simple_button.js',
           'type' => 'file',
         ],
       ],

@@ -46,7 +46,7 @@ function webpush_topics_block_view($delta = '') {
           ],
           'js' => [
             [
-              'data' => drupal_get_path('module', 'webpush_topics') . '/js/user_panel.js',
+              'data' => drupal_get_path('module', 'webpush_topics') . '/js/build/user_panel.js',
               'type' => 'file',
             ],
           ],
