@@ -359,6 +359,9 @@ function webpush_preprocess_html(&$variables) {
   // Load the app script.
   drupal_add_js(drupal_get_path('module', 'webpush') . '/js/build/app.js', 'file');
 
+  // Load the app CSS.
+  drupal_add_css(drupal_get_path('module', 'webpush') . '/css/notify_user.css', 'file');
+
   // Load the service worker.
   drupal_add_js(['webpush' => ['path' => url('/webpush/serviceworker/js')]], 'setting');
 
