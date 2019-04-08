@@ -9,6 +9,6 @@
   <?php
   endforeach;
   ?>
-    <div id="webpush-topics-subscribe" class="webpush-topics-button"><?php print t('Save'); ?></div>
-    <div id="webpush-topics-unsubscribe" class="webpush-topics-button"><?php print t('Disable'); ?></div>
+    <div id="webpush-topics-subscribe" class="webpush-topics-button"><?php print t('Save', [], ['context' => 'webpush_topics']); ?></div>
+    <div id="webpush-topics-unsubscribe" class="webpush-topics-button"><?php print t('Disable', [], ['context' => 'webpush_topics']); ?></div>
 </div>

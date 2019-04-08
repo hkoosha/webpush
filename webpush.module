@@ -86,7 +86,7 @@ function webpush_menu() {
  */
 function webpush_menu_alter(&$items) {
   $items['admin/content/webpush']['type'] = MENU_LOCAL_TASK;
-  $items['admin/content/webpush']['title'] = t('Push notifications');
+  $items['admin/content/webpush']['title'] = t('Push notifications', [], ['context' => 'webpush']);
 
   $items['admin/content/webpush/add']['page callback'] = 'drupal_get_form';
   $items['admin/content/webpush/add']['page arguments'] = ['webpush_admin_send_form'];
@@ -98,40 +98,40 @@ function webpush_admin_send_form() {
   if (!webpush_subscription__count()) {
     return [
       'no_subscriptions_message' => [
-        '#markup' => t('You need to have at least one registered subscription in order to send a push notification, but it seems that you have none.'),
+        '#markup' => t('You need to have at least one registered subscription in order to send a push notification, but it seems that you have none.', [], ['context' => 'webpush']),
       ],
     ];
   }
 
   $form['title'] = [
     '#type' => 'textfield',
-    '#title' => t('Title'),
-    '#description' => t('The title of your notification.'),
+    '#title' => t('Title', [], ['context' => 'webpush']),
+    '#description' => t('The title of your notification.', [], ['context' => 'webpush']),
     '#required' => TRUE,
   ];
 
   $form['body'] = [
     '#type' => 'textfield',
-    '#title' => t('Body'),
-    '#description' => t('The body of your notification.'),
+    '#title' => t('Body', [], ['context' => 'webpush']),
+    '#description' => t('The body of your notification.', [], ['context' => 'webpush']),
     '#maxlength' => 2048,
     '#required' => TRUE,
   ];
 
   $form['link'] = [
     '#type' => 'fieldset',
-    '#title' => t('Link'),
+    '#title' => t('Link', [], ['context' => 'webpush']),
   ];
   $form['link']['link_type'] = [
     '#type' => 'radios',
-    '#title' => t('Link type'),
+    '#title' => t('Link type', [], ['context' => 'webpush']),
     '#options' => webpush_link_type_options(),
     '#default_value' => variable_get('webpush_link_type', 'frontpage'),
   ];
   $form['link']['link_node'] = [
     '#type' => 'textfield',
-    '#title' => t('Node'),
-    '#description' => t('Autocomplete field'),
+    '#title' => t('Node', [], ['context' => 'webpush']),
+    '#description' => t('Autocomplete field', [], ['context' => 'webpush']),
     '#states' => [
       'visible' => [
         ':input[name="link_type"]' => ['value' => 'node'],
@@ -141,7 +141,7 @@ function webpush_admin_send_form() {
   ];
   $form['link']['link_custom'] = [
     '#type' => 'textfield',
-    '#title' => t('Custom link'),
+    '#title' => t('Custom link', [], ['context' => 'webpush']),
     '#maxlength' => 512,
     '#states' => [
       'visible' => [
@@ -152,7 +152,7 @@ function webpush_admin_send_form() {
 
   $form['submit'] = [
     '#type' => 'submit',
-    '#value' => t('Send'),
+    '#value' => t('Send', [], ['context' => 'webpush']),
     '#weight' => 100,
   ];
 
@@ -166,7 +166,7 @@ function webpush_admin_send_form_validate(&$form, &$form_state) {
   if ($values['link_type'] == 'node') {
     $title = $values['link_node'];
     if (empty($title)) {
-      form_error($form['link']['link_node'], t('You need to select a valid node.'));
+      form_error($form['link']['link_node'], t('You need to select a valid node.', [], ['context' => 'webpush']));
       return FALSE;
     }
     $matches = [];
@@ -181,7 +181,7 @@ function webpush_admin_send_form_validate(&$form, &$form_state) {
       // Verify that it's a valid nid.
       $node = node_load($nid);
       if (empty($node)) {
-        form_error($form['link']['link_node'], t('No node with nid %nid can be found', ['%nid' => $nid]));
+        form_error($form['link']['link_node'], t('No node with nid %nid can be found', ['%nid' => $nid], ['context' => 'webpush']));
         return FALSE;
       }
     }
@@ -204,7 +204,7 @@ function webpush_admin_send_form_validate(&$form, &$form_state) {
       $form_state['values']['link_node'] = $nid;
     }
     else {
-      form_error($form['link']['link_node'], t('No node starting with %title can be found', ['%title' => $title]));
+      form_error($form['link']['link_node'], t('No node starting with %title can be found', ['%title' => $title], ['context' => 'webpush']));
       return FALSE;
     }
 
@@ -212,11 +212,11 @@ function webpush_admin_send_form_validate(&$form, &$form_state) {
   elseif ($values['link_type'] == 'custom') {
     $url = $values['link_custom'];
     if (!valid_url($url, TRUE)) {
-      form_error($form['link']['link_custom'], t('The url you typed is not valid. It has to begin with http:// or https://'));
+      form_error($form['link']['link_custom'], t('The url you typed is not valid. It has to begin with http:// or https://', [], ['context' => 'webpush']));
       return FALSE;
     }
     if (strpos($url, $base_url) !== 0) {
-      form_error($form['link']['link_custom'], t('You can only add urls from the current domain (!url)', ['!url' => $base_url]));
+      form_error($form['link']['link_custom'], t('You can only add urls from the current domain (!url)', ['!url' => $base_url], ['context' => 'webpush']));
       return FALSE;
     }
 
@@ -255,7 +255,7 @@ function webpush_admin_send_form_submit($form, &$form_state) {
       $targets = $form_state['_webpush_targets'];
     }
     else {
-      $msg = t('You have no subscriptions to your selected topics.');
+      $msg = t('You have no subscriptions to your selected topics.', [], ['context' => 'webpush']);
       drupal_set_message($msg, 'warning');
       return;
     }
@@ -267,9 +267,9 @@ function webpush_admin_send_form_submit($form, &$form_state) {
 
 function webpush_link_type_options() {
   return [
-    'frontpage' => t('Frontpage'),
-    'node' => t('Node'),
-    'custom' => t('Custom'),
+    'frontpage' => t('Frontpage', [], ['context' => 'webpush']),
+    'node' => t('Node', [], ['context' => 'webpush']),
+    'custom' => t('Custom', [], ['context' => 'webpush']),
   ];
 }
 
@@ -323,16 +323,16 @@ function _webpush_serviceworker_file() {
 function webpush_permission() {
   return [
     'register webpush' => [
-      'title' => t('Register webpush'),
-      'description' => t('Register for receiving push notifications.'),
+      'title' => t('Register webpush', [], ['context' => 'webpush']),
+      'description' => t('Register for receiving push notifications.', [], ['context' => 'webpush']),
     ],
     'administer webpush' => [
-      'title' => t('Administer webpush'),
-      'description' => t('Set configuration options for webpush.'),
+      'title' => t('Administer webpush', [], ['context' => 'webpush']),
+      'description' => t('Set configuration options for webpush.', [], ['context' => 'webpush']),
     ],
     'send push notifications' => [
-      'title' => t('Send push notifications'),
-      'description' => t('Allows the user to send push notifications.'),
+      'title' => t('Send push notifications', [], ['context' => 'webpush']),
+      'description' => t('Allows the user to send push notifications.', [], ['context' => 'webpush']),
     ],
   ];
 
@@ -376,7 +376,7 @@ function webpush_preprocess_html(&$variables) {
 function webpush_block_info() {
   $blocks = [];
   $blocks['simple_button'] = [
-    'info' => t('Webpush simple button'),
+    'info' => t('Webpush simple button', [], ['context' => 'webpush']),
   ];
 
   return $blocks;
@@ -849,7 +849,8 @@ function webpush__send_notification_batch_finished($success, $results, $operatio
       '@count' => $total,
       '@success' => $success,
       '@fail' => $fail,
-    ]);
+    ],
+      ['context' => 'webpush']);
     $notification_entity = $results["notification_entity"];
     $notification_wrapper = entity_metadata_wrapper('webpush_notification', $notification_entity);
     $notification_wrapper->total->set($total);
@@ -861,11 +862,11 @@ function webpush__send_notification_batch_finished($success, $results, $operatio
     if ($fail) {
       $keep_invalid = variable_get('webpush_keep_invalid_subscriptions', FALSE);
       if (!$keep_invalid) {
-        $invalid = t('The subscriptions of the failed notifications have been deleted.');
+        $invalid = t('The subscriptions of the failed notifications have been deleted.', [], ['context' => 'webpush']);
         drupal_set_message($invalid);
       }
       else {
-        $invalid = t('The subscriptions of the failed notifications have not been deleted because your configuration indicates to keep them, but you should consider deleting them.');
+        $invalid = t('The subscriptions of the failed notifications have not been deleted because your configuration indicates to keep them, but you should consider deleting them.', [], ['context' => 'webpush']);
         drupal_set_message($invalid, 'warning');
       }
     }
@@ -877,7 +878,8 @@ function webpush__send_notification_batch_finished($success, $results, $operatio
     drupal_set_message(t('An error occurred while processing @operation with arguments : @args', [
       '@operation' => $error_operation[0],
       '@args' => print_r($error_operation[0], TRUE),
-    ]));
+    ],
+      ['context' => 'webpush']));
   }
 }
 

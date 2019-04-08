@@ -18,7 +18,7 @@ function webpush_topics_webpush_buttons_info() {
 function webpush_topics_block_info() {
   $blocks = [];
   $blocks['webpush_user_panel'] = [
-    'info' => t('Webpush user panel'),
+    'info' => t('Webpush user panel', [], ['context' => 'webpush_topics']),
   ];
 
   return $blocks;
@@ -72,7 +72,7 @@ function _webpush_topics_block_variables() {
 function _webpush_topics_get_topics($include_all = TRUE) {
   $topics = [];
   if ($include_all) {
-    $topics['all'] = t('All');
+    $topics['all'] = t('All', [], ['context' => 'webpush_topics']);
   }
   $vocabulary = taxonomy_vocabulary_machine_name_load('webpush_topics');
   $terms = entity_load('taxonomy_term', FALSE, ['vid' => $vocabulary->vid]);
@@ -182,20 +182,20 @@ function webpush_topics_form_webpush_admin_send_form_alter(&$form, &$form_state,
   $topics = _webpush_topics_get_topics($include_all = FALSE);
   $form['topics_wrapper'] = [
     '#type' => 'fieldset',
-    '#title' => t('Topics'),
-    '#descriptions' => t('Choose which topics subscribers should receive your notification.'),
+    '#title' => t('Topics', [], ['context' => 'webpush_topics']),
+    '#descriptions' => t('Choose which topics subscribers should receive your notification.', [], ['context' => 'webpush_topics']),
   ];
   $form['topics_wrapper']['topics_mode'] = [
     '#type' => 'radios',
     '#options' => [
-      'all' => t('All'),
-      'select' => t('Select topics'),
+      'all' => t('All', [], ['context' => 'webpush_topics']),
+      'select' => t('Select topics', [], ['context' => 'webpush_topics']),
     ],
     '#default_value' => 'select',
   ];
   $form['topics_wrapper']['topics'] = [
     '#type' => 'checkboxes',
-    '#title' => t('Topics'),
+    '#title' => t('Topics', [], ['context' => 'webpush_topics']),
     '#options' => $topics,
     '#states' => [
       'invisible' => [':input[name="topics_mode"]' => ['value' => 'all']],
@@ -217,7 +217,7 @@ function webpush_topics_admin_send_form_validate(&$form, &$form_state) {
   if ($topics_mode === 'select') {
     $selected_topics = $form_state["values"]["topics"];
     if (empty(array_filter($selected_topics))) {
-      form_error($form['topics_wrapper']['topics_mode'], t('You have to select at least one topic.'));
+      form_error($form['topics_wrapper']['topics_mode'], t('You have to select at least one topic.', [], ['context' => 'webpush_topics']));
       return FALSE;
     }
   }
@@ -298,7 +298,7 @@ function webpush_topics_subscription__overview() {
   $count = webpush_subscription__count();
   $content[] = [
     '#prefix' => '<div>',
-    '#markup' => t('You have <strong>!number</strong> push notification subscription(s):', ['!number' => $count]),
+    '#markup' => t('You have <strong>!number</strong> push notification subscription(s):', ['!number' => $count], ['context' => 'webpush_topics']),
     '#suffix' => '<br><br></div><ul>',
   ];
 
@@ -309,14 +309,15 @@ function webpush_topics_subscription__overview() {
       '#markup' => t('<em>!topic:</em> <strong>!count</strong> subscription(s).', [
         '!topic' => $topic_label,
         '!count' => count(webpush_topics__get_subscription_entities_filtered([$topic_tid])),
-      ]),
+      ],
+        ['context' => 'webpush_topics']),
       '#suffix' => '</li>',
     ];
   }
 
   $content[] = [
     '#prefix' => '<li>',
-    '#markup' => t('<em>All topics:</em> <strong>!count</strong> subscription(s).', ['!count' => count(webpush_topics__get_subscription_entities_without_topics())]),
+    '#markup' => t('<em>All topics:</em> <strong>!count</strong> subscription(s).', ['!count' => count(webpush_topics__get_subscription_entities_without_topics())], ['context' => 'webpush_topics']),
     '#suffix' => '</li></ul>',
   ];
 

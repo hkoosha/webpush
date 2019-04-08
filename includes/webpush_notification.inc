@@ -65,45 +65,45 @@ function _webpush_notification_entity_property_info() {
   $info = [];
 
   $info['webpush_notification']['properties']['id'] = [
-    'label' => t('ID'),
-    'description' => t('The notification ID.'),
+    'label' => t('ID', [], ['context' => 'webpush']),
+    'description' => t('The notification ID.', [], ['context' => 'webpush']),
     'type' => 'integer',
     'schema field' => 'id',
   ];
   $info['webpush_notification']['properties']['title'] = [
-    'label' => t('Title'),
-    'description' => t('The notification title.'),
+    'label' => t('Title', [], ['context' => 'webpush']),
+    'description' => t('The notification title.', [], ['context' => 'webpush']),
     'type' => 'text',
     'schema field' => 'title',
   ];
   $info['webpush_notification']['properties']['created'] = [
-    'label' => t('Created'),
-    'description' => t('The notification creation timestamp.'),
+    'label' => t('Created', [], ['context' => 'webpush']),
+    'description' => t('The notification creation timestamp.', [], ['context' => 'webpush']),
     'type' => 'date',
     'schema field' => 'created',
   ];
   $info['webpush_notification']['properties']['body'] = [
-    'label' => t('Body'),
-    'description' => t('The notification body.'),
+    'label' => t('Body', [], ['context' => 'webpush']),
+    'description' => t('The notification body.', [], ['context' => 'webpush']),
     'type' => 'text',
     'schema field' => 'body',
   ];
   $info['webpush_notification']['properties']['link'] = [
-    'label' => t('Link'),
-    'description' => t('The notification link (if any).'),
+    'label' => t('Link', [], ['context' => 'webpush']),
+    'description' => t('The notification link (if any).', [], ['context' => 'webpush']),
     'type' => 'text',
     'schema field' => 'link',
   ];
   $info['webpush_notification']['properties']['total'] = [
-    'label' => t('Total'),
-    'description' => t('Total registered subscriptions.'),
+    'label' => t('Total', [], ['context' => 'webpush']),
+    'description' => t('Total registered subscriptions.', [], ['context' => 'webpush']),
     'type' => 'integer',
     'schema field' => 'total',
     'setter callback' => 'entity_property_verbatim_set',
   ];
   $info['webpush_notification']['properties']['success'] = [
-    'label' => t('Success'),
-    'description' => t('Successful deliveries.'),
+    'label' => t('Success', [], ['context' => 'webpush']),
+    'description' => t('Successful deliveries.', [], ['context' => 'webpush']),
     'type' => 'integer',
     'schema field' => 'success',
     'setter callback' => 'entity_property_verbatim_set',

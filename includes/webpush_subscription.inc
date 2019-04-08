@@ -52,22 +52,22 @@ function _webpush_subscription_entity_property_info() {
   $info = [];
 
   $info['webpush_subscription']['properties']['id'] = [
-    'label' => t('ID'),
-    'description' => t('The subscription ID.'),
+    'label' => t('ID', [], ['context' => 'webpush']),
+    'description' => t('The subscription ID.', [], ['context' => 'webpush']),
     'type' => 'integer',
     'schema field' => 'id',
   ];
   $info['webpush_subscription']['properties']['subscription'] = [
-    'label' => t('Subscription'),
-    'description' => t('The serialized subscription object (\Minishlink\WebPush\Subscription)'),
+    'label' => t('Subscription', [], ['context' => 'webpush']),
+    'description' => t('The serialized subscription object (\Minishlink\WebPush\Subscription)', [], ['context' => 'webpush']),
     'type' => 'text',
     'schema field' => 'subscription',
     'setter callback' => 'entity_property_verbatim_set',
     'getter callback' => 'entity_property_verbatim_get',
   ];
   $info['webpush_subscription']['properties']['created'] = [
-    'label' => t('Created'),
-    'description' => t('The serialized subscription object (\Minishlink\WebPush\Subscription)'),
+    'label' => t('Created', [], ['context' => 'webpush']),
+    'description' => t('The serialized subscription object (\Minishlink\WebPush\Subscription)', [], ['context' => 'webpush']),
     'type' => 'date',
     'schema field' => 'subscription',
   ];
@@ -78,7 +78,7 @@ function _webpush_subscription_entity_property_info() {
 function webpush_subscription__overview() {
   $count = webpush_subscription__count();
   $content[] = [
-    '#markup' => t('You have !number push notification subscription(s).', ['!number' => $count]),
+    '#markup' => t('You have !number push notification subscription(s).', ['!number' => $count], ['context' => 'webpush']),
   ];
   return $content;
 }

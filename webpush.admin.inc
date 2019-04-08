@@ -21,19 +21,19 @@ function webpush_admin_configuration_form() {
 
   $form['default_values'] = [
     '#type' => 'fieldset',
-    '#title' => t('Default values'),
-    '#description' => t('Default values for your notification messages.'),
+    '#title' => t('Default values', [], ['context' => 'webpush']),
+    '#description' => t('Default values for your notification messages.', [], ['context' => 'webpush']),
   ];
   $form['default_values']['webpush_link_type'] = [
     '#type' => 'radios',
-    '#title' => t('Link type'),
+    '#title' => t('Link type', [], ['context' => 'webpush']),
     '#options' => webpush_link_type_options(),
     '#default_value' => variable_get('webpush_link_type', 'frontpage'),
   ];
   $form['default_values']['webpush_icon_fid'] = [
     '#type' => 'managed_file',
-    '#title' => t('Icon'),
-    '#description' => t('Allowed extensions: jpg, jpeg, png, gif. It should be at least 512x512 px.'),
+    '#title' => t('Icon', [], ['context' => 'webpush']),
+    '#description' => t('Allowed extensions: jpg, jpeg, png, gif. It should be at least 512x512 px.', [], ['context' => 'webpush']),
     '#default_value' => variable_get('webpush_icon_fid', ''),
     '#upload_validators' => [
       'file_validate_extensions' => ['jpg jpeg png gif'],
@@ -42,8 +42,8 @@ function webpush_admin_configuration_form() {
   ];
   $form['default_values']['webpush_badge_fid'] = [
     '#type' => 'managed_file',
-    '#title' => t('Badge'),
-    '#description' => t('Allowed extensions: jpg, jpeg, png, gif. It should be at least 128x128 px.'),
+    '#title' => t('Badge', [], ['context' => 'webpush']),
+    '#description' => t('Allowed extensions: jpg, jpeg, png, gif. It should be at least 128x128 px.', [], ['context' => 'webpush']),
     '#default_value' => variable_get('webpush_badge_fid', ''),
     '#upload_validators' => [
       'file_validate_extensions' => ['jpg jpeg png gif'],
@@ -86,21 +86,21 @@ function webpush_admin_advanced_configuration_form() {
 
   $form['app_keys'] = [
     '#type' => 'fieldset',
-    '#title' => t('App keys'),
-    '#description' => t('You can use this site to create your app keys:') . ' <a href="https://web-push-codelab.glitch.me/">https://web-push-codelab.glitch.me</a>',
+    '#title' => t('App keys', [], ['context' => 'webpush']),
+    '#description' => t('You can use this site to create your app keys:', [], ['context' => 'webpush']) . ' <a href="https://web-push-codelab.glitch.me/">https://web-push-codelab.glitch.me</a>',
     '#collapsible' => FALSE,
   ];
   $form['app_keys']['webpush_public_key'] = [
     '#type' => 'textfield',
-    '#title' => t('Public key'),
-    '#description' => t('Public key description.'),
+    '#title' => t('Public key', [], ['context' => 'webpush']),
+    '#description' => t('Public key description.', [], ['context' => 'webpush']),
     '#default_value' => variable_get('webpush_public_key', ''),
     '#required' => TRUE,
   ];
   $form['app_keys']['webpush_private_key'] = [
     '#type' => 'textfield',
-    '#title' => t('Private key'),
-    '#description' => t('Private key description.'),
+    '#title' => t('Private key', [], ['context' => 'webpush']),
+    '#description' => t('Private key description.', [], ['context' => 'webpush']),
     '#default_value' => variable_get('webpush_private_key', ''),
     '#required' => TRUE,
   ];
@@ -108,14 +108,14 @@ function webpush_admin_advanced_configuration_form() {
   $collapse = !variable_get('webpush_keep_invalid_subscriptions', FALSE);
   $form['debug'] = [
     '#type' => 'fieldset',
-    '#title' => t('Debug'),
-    '#description' => t('Several options that can be used for debugging.'),
+    '#title' => t('Debug', [], ['context' => 'webpush']),
+    '#description' => t('Several options that can be used for debugging.', [], ['context' => 'webpush']),
     '#collapsible' => FALSE,
   ];
   $form['debug']['webpush_keep_invalid_subscriptions'] = [
     '#type' => 'checkbox',
-    '#title' => t('Keep invalid subscriptions'),
-    '#description' => t('Enable this option if you want to keep the subscriptions in your database even if the sending of a notification has failed.'),
+    '#title' => t('Keep invalid subscriptions', [], ['context' => 'webpush']),
+    '#description' => t('Enable this option if you want to keep the subscriptions in your database even if the sending of a notification has failed.', [], ['context' => 'webpush']),
     '#default_value' => variable_get('webpush_keep_invalid_subscriptions', FALSE),
   ];
 
