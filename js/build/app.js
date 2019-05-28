@@ -32,7 +32,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       // If its denied, the button should appears as such, until the user
       // changes the permission manually
       if (Notification.permission === 'denied') {
-        console.warn('Notifications are denied by the user');
+        console.warn(Drupal.t('Notifications are denied by the user'));
         this.updateWebpushState('userdenied');
         return;
       }
@@ -40,10 +40,10 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       // Register the service worker.
       var that = this;
       navigator.serviceWorker.register("/webpush/serviceworker/js", { scope: '/' }).then(function () {
-        console.log('[SW] Service worker has been registered');
+        console.log(Drupal.t('[SW] Service worker has been registered'));
         that.push_updateSubscription();
       }, function (e) {
-        console.error('[SW] Service worker registration failed', e);
+        console.error(Drupal.t('[SW] Service worker registration failed'), e);
         that.updateWebpushState('incompatible');
       });
     },
@@ -84,19 +84,19 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
     unsupportedFeatures: function unsupportedFeatures() {
       if (!('serviceWorker' in navigator)) {
-        console.warn("Service workers are not supported by this browser");
+        console.warn(Drupal.t("Service workers are not supported by this browser"));
         this.updateWebpushState('incompatible');
         return true;
       }
 
       if (!('PushManager' in window)) {
-        console.warn('Push notifications are not supported by this browser');
+        console.warn(Drupal.t('Push notifications are not supported by this browser'));
         this.updateWebpushState('incompatible');
         return true;
       }
 
       if (!('showNotification' in ServiceWorkerRegistration.prototype)) {
-        console.warn('Notifications are not supported by this browser');
+        console.warn(Drupal.t('Notifications are not supported by this browser'));
         this.updateWebpushState('incompatible');
         return true;
       }
@@ -174,21 +174,21 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       var message = '';
       switch (state) {
         case 'enabled':
-          message = 'Disable Push notifications';
+          message = Drupal.t('Disable Push notifications');
           this.isPushEnabled = true;
           break;
         case 'disabled':
-          message = 'Enable Push notifications';
+          message = Drupal.t('Enable Push notifications');
           this.isPushEnabled = false;
           break;
         case 'computing':
-          message = 'Loading...';
+          message = Drupal.t('Loading...');
           break;
         case 'incompatible':
-          message = 'Push notifications are not compatible with this browser';
+          message = Drupal.t('Push notifications are not compatible with this browser');
           break;
         case 'userdenied':
-          message = 'The user has denied push notifications';
+          message = Drupal.t('The user has denied push notifications');
           break;
         default:
           console.error('Unhandled push button state', state);
@@ -287,7 +287,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
         return response && response.subscription && that.updateWebpushState('enabled');
       }) // Set your UI to show they have subscribed for push messages
       .catch(function (e) {
-        console.error('Error when updating the subscription', e);
+        console.error(Drupal.t('Error when updating the subscription'), e);
       });
     },
 
@@ -351,12 +351,12 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
           // means we failed to subscribe and the user will need
           // to manually change the notification permission to
           // subscribe to push messages
-          console.warn('Notifications are denied by the user.');
+          console.warn(Drupal.t('Notifications are denied by the user.'));
           that.updateWebpushState('userdenied');
         } else {
           // A problem occurred with the subscription; common reasons
           // include network errors or the user skipped the permission
-          console.error('Impossible to subscribe to push notifications', e);
+          console.error(Drupal.t('Impossible to subscribe to push notifications'), e);
           that.updateWebpushState('disabled');
         }
       });
@@ -393,7 +393,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
         // an unusual state, so  it may be best to remove
         // the users data from your data store and
         // inform the user that you have done so
-        console.error('Error when unsubscribing the user', e);
+        console.error(Drupal.t('Error when unsubscribing the user'), e);
         that.updateWebpushState('disabled');
       });
     }
