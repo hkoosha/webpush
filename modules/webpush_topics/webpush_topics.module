@@ -75,9 +75,10 @@ function _webpush_topics_get_topics($include_all = TRUE) {
     $topics['all'] = t('All', [], ['context' => 'webpush_topics']);
   }
   $vocabulary = taxonomy_vocabulary_machine_name_load('webpush_topics');
-  $terms = entity_load('taxonomy_term', FALSE, ['vid' => $vocabulary->vid]);
-  foreach ($terms as $tid => $term) {
-    $topics[$tid] = $term->name;
+  // Load terms in the sequence set up in the taxonomy.
+  $terms = taxonomy_get_tree($vocabulary->vid);
+  foreach ($terms as $key => $term) {
+    $topics[$term->tid] = $term->name;
   }
   return $topics;
 }
