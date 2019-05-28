@@ -732,6 +732,9 @@ function webpush__send_notification(Minishlink\WebPush\Subscription $subscriptio
     $payload['badge'] = $url;
   }
 
+  // Alter hook for the payload
+  drupal_alter('webpush_payload', $payload);
+
   // @TODO implement also an "image" (here, and in JS)
 
   try {
