@@ -940,3 +940,22 @@ function webpush_views_api() {
     'api' => 3,
   ];
 }
+
+function webpush_subscription__delete_all_form() {
+  $form = [
+    'delete' => [
+      '#type' => 'submit',
+      '#value' => t('Delete all subscriptions', [], ['context' => 'webpush']),
+      '#prefix' => '<br>',
+      '#submit' => ['webpush_subscription__delete_all'],
+    ],
+  ];
+  return $form;
+}
+
+function webpush_subscription__delete_all() {
+  $subscriptions = webpush_subscription__get_all();
+  entity_delete('webpush_subscription', $subscriptions);
+  $msg = t('!count subscriptions deleted.', ['!count' => count($subscriptions)], ['context' => 'webpush']);
+  drupal_set_message($msg);
+}

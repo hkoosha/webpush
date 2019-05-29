@@ -80,5 +80,10 @@ function webpush_subscription__overview() {
   $content[] = [
     '#markup' => t('You have !number push notification subscription(s).', ['!number' => $count], ['context' => 'webpush']),
   ];
+
+  if ($count) {
+    $content[] = drupal_get_form('webpush_subscription__delete_all_form');
+  }
+
   return $content;
 }

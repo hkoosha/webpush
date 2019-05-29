@@ -322,5 +322,9 @@ function webpush_topics_subscription__overview() {
     '#suffix' => '</li></ul>',
   ];
 
+  if ($count) {
+    $content[] = drupal_get_form('webpush_subscription__delete_all_form');
+  }
+
   return $content;
 }
