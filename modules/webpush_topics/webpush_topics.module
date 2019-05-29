@@ -330,6 +330,18 @@ function webpush_topics_subscription__overview() {
 }
 
 /**
+ * Implements hook_block_info_alter().
+ *
+ * When webpush_topics is enabled, the simple button block that is offered by
+ * webpush module should not be available.
+ */
+function webpush_topics_block_info_alter(&$blocks, $theme, $code_blocks) {
+  $blocks["webpush"]["simple_button"]["region"] = BLOCK_REGION_NONE;
+  $blocks["webpush"]["simple_button"]["status"] = 0;
+  $blocks["webpush"]["simple_button"]["info"] = $blocks["webpush"]["simple_button"]["info"] . ' (' . t('Unavailable') . ')';
+}
+
+/**
  * Implements hook_block_view_alter().
  *
  * When webpush_topics is enabled, the simple button block that is offered by
