@@ -51,6 +51,25 @@ function webpush_admin_configuration_form() {
     '#upload_location' => 'public://',
   ];
 
+  $form['default_values']['webpush_utm_source'] = [
+    '#type' => 'textfield',
+    '#default_value' => variable_get('webpush_utm_source', ''),
+    '#title' => 'utm_source',
+    '#description' => t('Add utm_source parameter to url. Leave empty to ignore.', [], ['context' => 'webpush']),
+  ];
+  $form['default_values']['webpush_utm_medium'] = [
+    '#type' => 'textfield',
+    '#default_value' => variable_get('webpush_utm_medium', ''),
+    '#title' => 'utm_medium',
+    '#description' => t('Add utm_medium parameter to url. Leave empty to ignore.', [], ['context' => 'webpush']),
+  ];
+  $form['default_values']['webpush_utm_campaign'] = [
+    '#type' => 'textfield',
+    '#default_value' => variable_get('webpush_utm_campaign', ''),
+    '#title' => 'utm_campaign',
+    '#description' => t('Add utm_campaign parameter to url. Leave empty to ignore.', [], ['context' => 'webpush']),
+  ];
+
   $form = system_settings_form($form);
   $form['#submit'][] = 'webpush_admin_configuration_form_submit__images';
 
