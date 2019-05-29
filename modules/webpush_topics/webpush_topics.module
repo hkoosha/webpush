@@ -328,3 +328,13 @@ function webpush_topics_subscription__overview() {
 
   return $content;
 }
+
+/**
+ * Implements hook_block_info_alter().
+ *
+ * When webpush_topics is enabled, the simple button block that is offered by
+ * webpush module should not be available.
+ */
+function webpush_topics_block_info_alter(&$blocks, $theme, $code_blocks) {
+  unset($blocks["webpush"]["simple_button"]);
+}
