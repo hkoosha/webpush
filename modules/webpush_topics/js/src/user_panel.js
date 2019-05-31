@@ -27,7 +27,12 @@
           const topics = [...$checked].map(i => {
             return i.checked ? i.value : false;
           }).filter(i => i !== false);
-          Drupal.behaviors.webPushApp.push_subscribe({webpush_topics: topics});
+
+          // If nothing got selected, there's nothing to send to the backend.
+          if (topics.length !== 0) {
+            Drupal.behaviors.webPushApp.push_subscribe({webpush_topics: topics});
+          }
+
           const $panel = $('#webpush-topics-panel');
           $panel.removeClass('expanded');
         });

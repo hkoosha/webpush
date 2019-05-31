@@ -33,7 +33,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
           }).filter(function (i) {
             return i !== false;
           });
-          Drupal.behaviors.webPushApp.push_subscribe({ webpush_topics: topics });
+
+          // If nothing got selected, there's nothing to send to the backend.
+          if (topics.length !== 0) {
+            Drupal.behaviors.webPushApp.push_subscribe({ webpush_topics: topics });
+          }
+
           var $panel = $('#webpush-topics-panel');
           $panel.removeClass('expanded');
         });
